@@ -38,6 +38,7 @@ button:hover {
   width: 60%;
   position: fixed;
   top: 0;
+  bottom: 0;
 }
 
 .tab {
@@ -46,9 +47,11 @@ button:hover {
   border-bottom: solid 2px rgb(255, 255, 255);
   position: relative;
   right: 0;
-  transition: 1s;
+  transition: 0.7s;
 }
 
 .tab:hover {
-  transform: translateX(20px);
+  background-color: rgb(255, 255, 255);
+  color: rgb(255, 42, 40);
+  cursor: pointer;
 }

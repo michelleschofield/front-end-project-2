@@ -1,0 +1,23 @@
+button:hover {
+  cursor: pointer;
+}
+
+.navbar {
+  height: 5rem;
+  background-color: rgb(99, 187, 255);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-wrapper {
+  max-width: 400px;
+  padding: 0.5rem;
+}
+
+.menu-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  padding: 1rem;
+  font-size: xx-large;
+}

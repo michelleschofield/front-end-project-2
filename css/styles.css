@@ -39,3 +39,16 @@ button:hover {
   position: fixed;
   top: 0;
 }
+
+.tab {
+  text-align: right;
+  padding: 1rem;
+  border-bottom: solid 2px rgb(255, 255, 255);
+  position: relative;
+  right: 0;
+  transition: 1s;
+}
+
+.tab:hover {
+  transform: translateX(20px);
+}

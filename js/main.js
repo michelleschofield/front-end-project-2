@@ -17,6 +17,7 @@ if (!$menu) throw new Error('$menu query failed');
 if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
 if (!$openMenuButton) throw new Error('$openMenuButton query failed');
+document.addEventListener('DOMContentLoaded', () => viewSwap(data.currentView));
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
 $tabHolder.addEventListener('click', handleMenuInteraction);
@@ -43,6 +44,8 @@ function viewSwap(view) {
       $view.className = 'view hidden';
     }
   });
+  data.currentView = view;
+  writeData();
 }
 function openMenu() {
   if (!$menu) throw new Error('$menu does not exist');

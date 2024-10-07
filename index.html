@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="css/reset.css" />
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Quicksand:wght@300..700&display=swap"
+      rel="stylesheet" />
   </head>
   <body>
     <header>
@@ -32,9 +37,19 @@
         <h1>Home</h1>
       </div>
       <div class="view hidden" data-view="study sets">
-        <div class="row">
+        <div class="row align-center justify-right bg-light-gray">
           <h2>Make a new set</h2>
-          <i class="fa-solid fa-arrow-right"></i>
+          <button class="icon-button">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+        <div class="row bg-light-gray section-head">
+          <h2>Your sets</h2>
+        </div>
+        <div id="no-sets" class="row text-center bg-light-gray to-bottom">
+          <h3>
+            It appear you don't have any sets, you can make your first one above
+          </h3>
         </div>
       </div>
       <div class="view hidden" data-view="flashcards">

@@ -1,11 +1,35 @@
+html,
+body,
+main {
+  height: 100%;
+}
+
+body {
+  font-family: Quicksand, serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Kanit, serif;
+}
+
 button:hover {
   cursor: pointer;
+}
+
+.bg-light-gray {
+  background-color: rgb(239, 239, 239);
 }
 
 .icon-button {
   background-color: transparent;
   border: none;
   font-size: xx-large;
+  padding: 1rem;
 }
 
 .navbar {
@@ -22,13 +46,11 @@ button:hover {
 
 .open-menu {
   color: rgb(255, 255, 255);
-  padding: 1rem;
 }
 
 .close-menu {
   color: rgb(255, 255, 255);
   align-self: flex-end;
-  padding: 1rem;
 }
 
 .menu {
@@ -53,4 +75,20 @@ button:hover {
   background-color: rgb(255, 255, 255);
   color: rgb(255, 42, 40);
   cursor: pointer;
+}
+
+.section-head {
+  border-top: solid 2px rgb(142, 142, 142);
+  background: linear-gradient(rgb(201, 201, 201), rgb(239, 239, 239) 60%);
+  padding-left: 1rem;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.to-bottom {
+  height: 100%;
 }

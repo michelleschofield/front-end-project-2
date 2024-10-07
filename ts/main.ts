@@ -4,6 +4,7 @@ const views = [
   'flashcards',
   'quiz',
   'match',
+  'memory',
   'asteroids',
 ];
 
@@ -13,6 +14,7 @@ const $closeMenuButton = document.querySelector(
   '.close-menu',
 ) as HTMLButtonElement;
 const $openMenuButton = document.querySelector('.open-menu');
+const $views = document.querySelectorAll('.view');
 
 if (!$menu) throw new Error('$menu query failed');
 if (!$tabHolder) throw new Error('$tabHolder query failed');
@@ -21,8 +23,39 @@ if (!$openMenuButton) throw new Error('$openMenuButton query failed');
 
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
+$tabHolder.addEventListener('click', handleMenuInteraction);
 
 buildMenu();
+
+function handleMenuInteraction(event: Event): void {
+  const $eventTarget = event.target as HTMLDivElement;
+
+  let $tab;
+
+  if ($eventTarget.matches('.tab')) {
+    $tab = $eventTarget;
+  } else {
+    $tab = $eventTarget.closest('.tab');
+  }
+
+  if (!$tab) return;
+
+  const view = $tab.getAttribute('data-view');
+  if (!view) throw new Error('$tab does not have an associated view');
+
+  viewSwap(view);
+  closeMenu();
+}
+
+function viewSwap(view: string): void {
+  $views.forEach(($view) => {
+    if ($view.matches(`[data-view="${view}"]`)) {
+      $view.className = 'view';
+    } else {
+      $view.className = 'view hidden';
+    }
+  });
+}
 
 function openMenu(): void {
   if (!$menu) throw new Error('$menu does not exist');

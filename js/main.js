@@ -5,19 +5,45 @@ const views = [
   'flashcards',
   'quiz',
   'match',
+  'memory',
   'asteroids',
 ];
 const $menu = document.querySelector('.menu');
 const $tabHolder = document.querySelector('.tabs');
 const $closeMenuButton = document.querySelector('.close-menu');
 const $openMenuButton = document.querySelector('.open-menu');
+const $views = document.querySelectorAll('.view');
 if (!$menu) throw new Error('$menu query failed');
 if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
 if (!$openMenuButton) throw new Error('$openMenuButton query failed');
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
+$tabHolder.addEventListener('click', handleMenuInteraction);
 buildMenu();
+function handleMenuInteraction(event) {
+  const $eventTarget = event.target;
+  let $tab;
+  if ($eventTarget.matches('.tab')) {
+    $tab = $eventTarget;
+  } else {
+    $tab = $eventTarget.closest('.tab');
+  }
+  if (!$tab) return;
+  const view = $tab.getAttribute('data-view');
+  if (!view) throw new Error('$tab does not have an associated view');
+  viewSwap(view);
+  closeMenu();
+}
+function viewSwap(view) {
+  $views.forEach(($view) => {
+    if ($view.matches(`[data-view="${view}"]`)) {
+      $view.className = 'view';
+    } else {
+      $view.className = 'view hidden';
+    }
+  });
+}
 function openMenu() {
   if (!$menu) throw new Error('$menu does not exist');
   $menu.className = 'menu row dir-column';

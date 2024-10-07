@@ -12,14 +12,23 @@ const $tabHolder = document.querySelector('.tabs') as HTMLDivElement;
 const $closeMenuButton = document.querySelector(
   '.close-menu',
 ) as HTMLButtonElement;
+const $openMenuButton = document.querySelector('.open-menu');
 
 if (!$menu) throw new Error('$menu query failed');
 if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
+if (!$openMenuButton) throw new Error('$openMenuButton query failed');
 
 $closeMenuButton.addEventListener('click', closeMenu);
+$openMenuButton.addEventListener('click', openMenu);
 
 buildMenu();
+
+function openMenu(): void {
+  if (!$menu) throw new Error('$menu does not exist');
+
+  $menu.className = 'menu row dir-column';
+}
 
 function closeMenu(): void {
   if (!$menu) throw new Error('$menu does not exist');

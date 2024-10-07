@@ -10,11 +10,18 @@ const views = [
 const $menu = document.querySelector('.menu');
 const $tabHolder = document.querySelector('.tabs');
 const $closeMenuButton = document.querySelector('.close-menu');
+const $openMenuButton = document.querySelector('.open-menu');
 if (!$menu) throw new Error('$menu query failed');
 if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
+if (!$openMenuButton) throw new Error('$openMenuButton query failed');
 $closeMenuButton.addEventListener('click', closeMenu);
+$openMenuButton.addEventListener('click', openMenu);
 buildMenu();
+function openMenu() {
+  if (!$menu) throw new Error('$menu does not exist');
+  $menu.className = 'menu row dir-column';
+}
 function closeMenu() {
   if (!$menu) throw new Error('$menu does not exist');
   $menu.className = 'menu row dir-column hidden';

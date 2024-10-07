@@ -7,11 +7,25 @@ const views = [
   'asteroids',
 ];
 
-const $tabHolder = document.querySelector('.tabs');
+const $menu = document.querySelector('.menu') as HTMLDivElement;
+const $tabHolder = document.querySelector('.tabs') as HTMLDivElement;
+const $closeMenuButton = document.querySelector(
+  '.close-menu',
+) as HTMLButtonElement;
 
-if (!$tabHolder) throw new Error('there is no tab holder');
+if (!$menu) throw new Error('$menu query failed');
+if (!$tabHolder) throw new Error('$tabHolder query failed');
+if (!$closeMenuButton) throw new Error('$closeMenu query failed');
+
+$closeMenuButton.addEventListener('click', closeMenu);
 
 buildMenu();
+
+function closeMenu(): void {
+  if (!$menu) throw new Error('$menu does not exist');
+
+  $menu.className = 'menu row dir-column hidden';
+}
 
 function buildMenu(): void {
   views.forEach((view) => {
@@ -20,6 +34,7 @@ function buildMenu(): void {
 
     $text.textContent = capitalizeAllWords(view);
     $tab.className = 'tab';
+    $tab.setAttribute('data-view', view);
 
     $tab.appendChild($text);
 

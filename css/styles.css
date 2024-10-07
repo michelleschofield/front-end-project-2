@@ -2,11 +2,18 @@ button:hover {
   cursor: pointer;
 }
 
+.icon-button {
+  background-color: transparent;
+  border: none;
+  font-size: xx-large;
+}
+
 .navbar {
   height: 5rem;
   background-color: rgb(99, 187, 255);
   justify-content: space-between;
   align-items: center;
+  position: sticky;
 }
 
 .logo-wrapper {
@@ -15,9 +22,20 @@ button:hover {
 }
 
 .menu-button {
-  background-color: transparent;
-  border: none;
-  color: white;
+  color: rgb(255, 255, 255);
   padding: 1rem;
-  font-size: xx-large;
+}
+
+.close-menu {
+  color: rgb(255, 255, 255);
+  align-self: flex-end;
+  padding: 1rem;
+}
+
+.menu {
+  background-color: rgb(255, 42, 40);
+  color: white;
+  width: 60%;
+  position: fixed;
+  top: 0;
 }

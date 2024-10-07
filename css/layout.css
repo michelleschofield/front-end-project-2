@@ -2,6 +2,10 @@
   display: flex;
 }
 
+.dir-column {
+  flex-direction: column;
+}
+
 img {
   width: 100%;
 }

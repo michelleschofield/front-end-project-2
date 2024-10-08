@@ -5,12 +5,14 @@ interface Card {
   infoType: string;
   info: string;
   pokemonImg: string;
+  cardId: number;
 }
 
 interface StudySet {
   setName: string;
   id: number;
   cards: Card[];
+  nextCardId: number;
 }
 
 interface Data {
@@ -18,6 +20,7 @@ interface Data {
   sets: StudySet[];
   nextSetId: number;
   viewingStudySet: StudySet | null;
+  editingCard: Card | null;
 }
 
 const data: Data = readData();
@@ -34,10 +37,12 @@ function readData(): Data {
     const defaultData: Data = {
       currentView: 'home',
       viewingStudySet: null,
+      editingCard: null,
       sets: [
         {
           setName: 'tester',
           id: 0,
+          nextCardId: 4,
           cards: [
             {
               pokemonName: 'bulbasaur',
@@ -46,6 +51,7 @@ function readData(): Data {
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+              cardId: 0,
             },
             {
               pokemonName: 'bulbasaur',
@@ -54,6 +60,7 @@ function readData(): Data {
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+              cardId: 1,
             },
             {
               pokemonName: 'bulbasaur',
@@ -62,6 +69,7 @@ function readData(): Data {
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+              cardId: 2,
             },
             {
               pokemonName: 'bulbasaur',
@@ -70,12 +78,14 @@ function readData(): Data {
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+              cardId: 3,
             },
           ],
         },
         {
           setName: 'Test 2',
           id: 1,
+          nextCardId: 1,
           cards: [
             {
               pokemonName: 'bulby boy',
@@ -84,6 +94,7 @@ function readData(): Data {
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+              cardId: 0,
             },
           ],
         },

@@ -24,7 +24,7 @@ button:hover {
 header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 1;
 }
 
 .small-text {
@@ -72,6 +72,9 @@ header {
 
 .all-sets {
   color: rgb(142, 142, 142);
+}
+
+.sm-icon {
   font-size: 1.5rem;
 }
 

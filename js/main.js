@@ -14,21 +14,24 @@ const $closeMenuButton = document.querySelector('.close-menu');
 const $openMenuButton = document.querySelector('.open-menu');
 const $views = document.querySelectorAll('.view');
 const $newSetButton = document.querySelector('#new-set');
-const $viewSetsButton = document.querySelector('#to-sets');
 const $setsHolder = document.querySelector('#sets-holder');
 const $viewingSet = document.querySelector('#viewing-set');
+const $cardEditor = document.querySelector('[data-view="specific-card"]');
 if (!$menu) throw new Error('$menu query failed');
 if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
 if (!$openMenuButton) throw new Error('$openMenuButton query failed');
 if (!$newSetButton) throw new Error('$newSetButton query failed');
-if (!$viewSetsButton) throw new Error('$viewSetsButton query failed');
 if (!$setsHolder) throw new Error('$setsHolder query failed');
 if (!$viewingSet) throw new Error('$viewingSet query failed');
+if (!$cardEditor) throw new Error('$cardEditor query failed');
 document.addEventListener('DOMContentLoaded', () => {
   viewSwap(data.currentView);
   setUpSets();
-  if (data.viewingStudySet) viewStudySet(data.viewingStudySet);
+  if (data.editingCard) {
+  } else if (data.viewingStudySet) {
+    viewStudySet(data.viewingStudySet);
+  }
 });
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
@@ -36,11 +39,6 @@ $tabHolder.addEventListener('click', handleMenuInteraction);
 $newSetButton.addEventListener('click', () => {
   console.log('click!');
   viewStudySet(data.sets[0]);
-});
-$viewSetsButton.addEventListener('click', () => {
-  data.viewingStudySet = null;
-  $viewingSet.replaceChildren();
-  viewSwap('study sets');
 });
 $setsHolder.addEventListener('click', handleSetsClick);
 buildMenu();
@@ -91,19 +89,24 @@ function showNoSets() {
 function viewStudySet(studySet) {
   const { setName, cards } = studySet;
   data.viewingStudySet = studySet;
-  viewSwap('specific set');
+  viewSwap('specific-set');
   if (!$viewingSet) throw new Error('$viewingSet does not exist');
+  const $backRow = renderBackRow('All Sets', () => {
+    data.viewingStudySet = null;
+    $viewingSet.replaceChildren();
+    viewSwap('study sets');
+  });
   const $titleRow = renderTitleRow(setName);
   const $cardsContainer = document.createElement('div');
   $cardsContainer.className = 'row wrap';
-  $viewingSet.append($titleRow, $cardsContainer);
+  $viewingSet.append($backRow, $titleRow, $cardsContainer);
   cards.forEach((card) => {
     const renderedCard = renderBothSidesOfCard(card);
     $cardsContainer.append(renderedCard);
   });
 }
 function renderBothSidesOfCard(card) {
-  const { pokemonName, pokemonImg, info } = card;
+  const { pokemonName, pokemonImg, info, cardId } = card;
   const $holder = document.createElement('div');
   $holder.className = 'row horz-padding';
   const $frontSide = renderPokemonSideOfCard(
@@ -111,16 +114,24 @@ function renderBothSidesOfCard(card) {
     pokemonImg,
   );
   const $backSide = renderTextSideOfCard(info);
-  const $buttons = renderTrashAndEdit();
+  const $buttons = renderTrashAndEdit(cardId);
   $holder.append($frontSide, $backSide, $buttons);
   return $holder;
 }
-function renderTrashAndEdit() {
+function renderTrashAndEdit(cardId) {
   const $buttonHolder = document.createElement('div');
   const $editButton = document.createElement('button');
   const $trashButton = document.createElement('button');
   const $editIcon = document.createElement('i');
   const $trashIcon = document.createElement('i');
+  $editButton.addEventListener('click', () => {
+    openCardEditor(cardId);
+  });
+  $trashButton.addEventListener('click', () => {
+    console.log('trash!');
+  });
+  $editButton.setAttribute('id', `${cardId}`);
+  $trashButton.setAttribute('id', `${cardId}`);
   $buttonHolder.className = 'row dir-column small-text justify-center';
   $editButton.className = 'icon-button gray-text';
   $trashButton.className = 'icon-button gray-text';
@@ -130,6 +141,37 @@ function renderTrashAndEdit() {
   $trashButton.append($trashIcon);
   $buttonHolder.append($editButton, $trashButton);
   return $buttonHolder;
+}
+function renderBackRow(text, buttonCallback) {
+  const $row = document.createElement('div');
+  const $button = document.createElement('button');
+  const $arrow = document.createElement('i');
+  const $text = document.createElement('h3');
+  $row.className = 'row align-center bg-light-gray';
+  $button.className = 'icon-button sm-icon gray-text';
+  $arrow.className = 'fa-solid fa-arrow-left';
+  $text.className = 'gray-text';
+  $text.textContent = text;
+  $button.addEventListener('click', () => {
+    buttonCallback();
+  });
+  $button.append($arrow);
+  $row.append($button, $text);
+  return $row;
+}
+function openCardEditor(cardId) {
+  if (!$cardEditor) throw new Error('$cardEditor does not exist');
+  const setName = data.viewingStudySet?.setName;
+  if (!setName) throw new Error('Cannot edit card if not viewing set');
+  viewSwap('specific-card');
+  const $backRow = renderBackRow(setName, () => {
+    data.editingCard = null;
+    $cardEditor.replaceChildren();
+    viewSwap('specific-set');
+  });
+  const $container = document.createElement('div');
+  $container.className = 'row wrap';
+  $cardEditor.append($backRow, $container);
 }
 function renderTextSideOfCard(text) {
   const $card = document.createElement('div');
@@ -180,8 +222,8 @@ function handleMenuInteraction(event) {
   viewSwap(view);
   closeMenu();
 }
-function viewSwap(view) {
-  $views.forEach(($view) => {
+function viewSwap(view, $array = $views) {
+  $array.forEach(($view) => {
     if ($view.matches(`[data-view="${view}"]`)) {
       $view.className = 'view';
     } else {

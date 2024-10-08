@@ -16,6 +16,7 @@ const $views = document.querySelectorAll('.view');
 const $newSetButton = document.querySelector('#new-set');
 const $viewSetsButton = document.querySelector('#to-sets');
 const $setsHolder = document.querySelector('#sets-holder');
+const $viewingSet = document.querySelector('#viewing-set');
 if (!$menu) throw new Error('$menu query failed');
 if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
@@ -23,9 +24,11 @@ if (!$openMenuButton) throw new Error('$openMenuButton query failed');
 if (!$newSetButton) throw new Error('$newSetButton query failed');
 if (!$viewSetsButton) throw new Error('$viewSetsButton query failed');
 if (!$setsHolder) throw new Error('$setsHolder query failed');
+if (!$viewingSet) throw new Error('$viewingSet query failed');
 document.addEventListener('DOMContentLoaded', () => {
   viewSwap(data.currentView);
   setUpSets();
+  if (data.viewingStudySet) viewStudySet(data.viewingStudySet);
 });
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
@@ -34,8 +37,25 @@ $newSetButton.addEventListener('click', () => {
   console.log('click!');
   viewStudySet(data.sets[0]);
 });
-$viewSetsButton.addEventListener('click', () => viewSwap('study sets'));
+$viewSetsButton.addEventListener('click', () => {
+  data.viewingStudySet = null;
+  $viewingSet.replaceChildren();
+  viewSwap('study sets');
+});
+$setsHolder.addEventListener('click', handleSetsClick);
 buildMenu();
+function handleSetsClick(event) {
+  const $eventTarget = event.target;
+  if ($eventTarget.matches('.row')) {
+    return;
+  }
+  let $row = $eventTarget.closest('.row');
+  const setId = $row?.getAttribute('data-set-id');
+  if (!setId) return;
+  const studySet = data.sets.find((studySet) => studySet.id === +setId);
+  if (!studySet) throw new Error(`no study sets match the id ${setId}`);
+  viewStudySet(studySet);
+}
 function setUpSets() {
   const sets = data.sets;
   if (!sets.length) {
@@ -52,6 +72,7 @@ function renderSetName(studySet) {
   const $viewSetButton = document.createElement('button');
   const $arrowIcon = document.createElement('i');
   $row.className = 'row align-center justify-right';
+  $row.setAttribute('data-set-id', `${studySet.id}`);
   $setName.textContent = studySet.setName;
   $viewSetButton.className = 'icon-button';
   $arrowIcon.className = 'fa-solid fa-arrow-right';
@@ -68,8 +89,50 @@ function showNoSets() {
   $setsHolder.appendChild($noSetsText);
 }
 function viewStudySet(studySet) {
+  const { setName, id, cards } = studySet;
+  data.viewingStudySet = studySet;
   viewSwap('specific set');
-  console.log('studySet:', studySet);
+  if (!$viewingSet) throw new Error('$viewingSet does not exist');
+  const $titleRow = renderTitleRow(setName);
+  $viewingSet.append($titleRow);
+  cards.forEach((card) => {
+    const renderedCard = renderBothSidesOfCard(card);
+    $viewingSet.append(renderedCard);
+  });
+}
+function renderBothSidesOfCard(card) {
+  const { pokemonName, pokemonImg } = card;
+  const $holder = document.createElement('div');
+  const $frontSide = renderPokemonSideOfCard(pokemonName, pokemonImg);
+  $holder.append($frontSide);
+  return $holder;
+}
+function renderPokemonSideOfCard(name, imageURL) {
+  const $card = document.createElement('div');
+  const $imageWrapper = document.createElement('div');
+  const $image = document.createElement('img');
+  const $name = document.createElement('h3');
+  $card.className = 'card';
+  $imageWrapper.className = 'card-image';
+  $image.setAttribute('src', imageURL);
+  $name.textContent = name;
+  $imageWrapper.append($image);
+  $card.append($imageWrapper, $name);
+  return $card;
+}
+function renderTitleRow(title) {
+  const $titleRow = document.createElement('div');
+  const $title = document.createElement('h2');
+  const $changeTitleButton = document.createElement('button');
+  const $pencilIcon = document.createElement('i');
+  $title.textContent = title;
+  $changeTitleButton.textContent = 'Change Title';
+  $changeTitleButton.className = 'icon-button gray-text change-title';
+  $pencilIcon.className = 'fa-solid fa-pencil';
+  $titleRow.className = 'row space-between align-center horz-padding';
+  $changeTitleButton.prepend($pencilIcon);
+  $titleRow.append($title, $changeTitleButton);
+  return $titleRow;
 }
 function handleMenuInteraction(event) {
   const $eventTarget = event.target;

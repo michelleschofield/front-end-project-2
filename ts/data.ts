@@ -17,6 +17,7 @@ interface Data {
   currentView: string;
   sets: StudySet[];
   nextSetId: number;
+  viewingStudySet: StudySet | null;
 }
 
 const data: Data = readData();
@@ -32,6 +33,7 @@ function readData(): Data {
   if (!dataJSON) {
     const defaultData: Data = {
       currentView: 'home',
+      viewingStudySet: null,
       sets: [
         {
           setName: 'tester',
@@ -52,7 +54,7 @@ function readData(): Data {
           id: 1,
           cards: [
             {
-              pokemonName: 'bulbasaur',
+              pokemonName: 'bulby boy',
               pokemonId: 1,
               infoType: 'flavor_text',
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',

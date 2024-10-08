@@ -37,12 +37,27 @@ $newSetButton.addEventListener('click', () => {
 $viewSetsButton.addEventListener('click', () => viewSwap('study sets'));
 buildMenu();
 function setUpSets() {
-  console.log('setting up sets');
   const sets = data.sets;
   if (!sets.length) {
     showNoSets();
-    console.log('no sets');
   }
+  sets.forEach((studySet) => {
+    const $row = renderSetName(studySet);
+    $setsHolder?.append($row);
+  });
+}
+function renderSetName(studySet) {
+  const $row = document.createElement('div');
+  const $setName = document.createElement('h2');
+  const $viewSetButton = document.createElement('button');
+  const $arrowIcon = document.createElement('i');
+  $row.className = 'row align-center justify-right';
+  $setName.textContent = studySet.setName;
+  $viewSetButton.className = 'icon-button';
+  $arrowIcon.className = 'fa-solid fa-arrow-right';
+  $viewSetButton.appendChild($arrowIcon);
+  $row.append($setName, $viewSetButton);
+  return $row;
 }
 function showNoSets() {
   if (!$setsHolder) throw new Error('$setsHolder does not exist');

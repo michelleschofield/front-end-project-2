@@ -11,22 +11,36 @@ function readData() {
     const defaultData = {
       currentView: 'home',
       sets: [
-        // {
-        //   setName: 'tester',
-        //   id: 0,
-        //   cards: [
-        //     {
-        //       pokemonName: 'bulbasaur',
-        //       pokemonId: 1,
-        //       infoType: 'flavor_text',
-        //       info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
-        //       pokemonImg:
-        //         'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
-        //     },
-        //   ],
-        // },
+        {
+          setName: 'tester',
+          id: 0,
+          cards: [
+            {
+              pokemonName: 'bulbasaur',
+              pokemonId: 1,
+              infoType: 'flavor_text',
+              info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
+              pokemonImg:
+                'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+            },
+          ],
+        },
+        {
+          setName: 'Test 2',
+          id: 1,
+          cards: [
+            {
+              pokemonName: 'bulbasaur',
+              pokemonId: 1,
+              infoType: 'flavor_text',
+              info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
+              pokemonImg:
+                'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+            },
+          ],
+        },
       ],
-      nextSetId: 1,
+      nextSetId: 2,
     };
     return defaultData;
   }

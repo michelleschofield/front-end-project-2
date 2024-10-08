@@ -116,12 +116,15 @@ function viewStudySet(studySet: StudySet): void {
   if (!$viewingSet) throw new Error('$viewingSet does not exist');
 
   const $titleRow = renderTitleRow(setName);
+  const $cardsContainer = document.createElement('div');
 
-  $viewingSet.append($titleRow);
+  $cardsContainer.className = 'row wrap';
+
+  $viewingSet.append($titleRow, $cardsContainer);
 
   cards.forEach((card) => {
     const renderedCard = renderBothSidesOfCard(card);
-    $viewingSet.append(renderedCard);
+    $cardsContainer.append(renderedCard);
   });
 }
 
@@ -129,7 +132,7 @@ function renderBothSidesOfCard(card: Card): HTMLDivElement {
   const { pokemonName, pokemonImg, info } = card;
 
   const $holder = document.createElement('div');
-  $holder.className = 'row horz-padding space-between';
+  $holder.className = 'row horz-padding';
 
   const $frontSide = renderPokemonSideOfCard(
     capitalizeWord(pokemonName),

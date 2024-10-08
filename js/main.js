@@ -94,16 +94,18 @@ function viewStudySet(studySet) {
   viewSwap('specific set');
   if (!$viewingSet) throw new Error('$viewingSet does not exist');
   const $titleRow = renderTitleRow(setName);
-  $viewingSet.append($titleRow);
+  const $cardsContainer = document.createElement('div');
+  $cardsContainer.className = 'row wrap';
+  $viewingSet.append($titleRow, $cardsContainer);
   cards.forEach((card) => {
     const renderedCard = renderBothSidesOfCard(card);
-    $viewingSet.append(renderedCard);
+    $cardsContainer.append(renderedCard);
   });
 }
 function renderBothSidesOfCard(card) {
   const { pokemonName, pokemonImg, info } = card;
   const $holder = document.createElement('div');
-  $holder.className = 'row horz-padding space-between';
+  $holder.className = 'row horz-padding';
   const $frontSide = renderPokemonSideOfCard(
     capitalizeWord(pokemonName),
     pokemonImg,

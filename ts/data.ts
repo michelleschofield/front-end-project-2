@@ -47,6 +47,30 @@ function readData(): Data {
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
             },
+            {
+              pokemonName: 'bulbasaur',
+              pokemonId: 1,
+              infoType: 'text',
+              info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
+              pokemonImg:
+                'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+            },
+            {
+              pokemonName: 'bulbasaur',
+              pokemonId: 1,
+              infoType: 'text',
+              info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
+              pokemonImg:
+                'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+            },
+            {
+              pokemonName: 'bulbasaur',
+              pokemonId: 1,
+              infoType: 'text',
+              info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
+              pokemonImg:
+                'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
+            },
           ],
         },
         {

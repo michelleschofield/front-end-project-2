@@ -26,6 +26,14 @@ header {
   top: 0;
 }
 
+.small-text {
+  font-size: small;
+}
+
+.gray-text {
+  color: rgb(142, 142, 142);
+}
+
 .bg-light-gray {
   background-color: rgb(239, 239, 239);
 }
@@ -110,10 +118,6 @@ header {
   height: 100%;
 }
 
-.gray-text {
-  color: rgb(142, 142, 142);
-}
-
 .no-sets {
   padding: 1rem;
 }
@@ -128,12 +132,58 @@ header {
   width: 9rem;
   height: 13rem;
   padding: 0.5rem;
+  border-radius: 5px;
+  position: relative;
+  margin: 0.5rem;
 }
 
 .card-image {
   width: 100%;
 }
 
-.small-text {
-  font-size: small;
+/* pokeball card */
+
+.card.pokeball {
+  padding: 0;
 }
+
+.red-half {
+  background-color: rgb(255, 42, 40);
+  height: 50%;
+  width: 100%;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.white-half {
+  background-color: rgb(255, 255, 255);
+  height: 50%;
+  width: 100%;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.mid-section {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.mid-stripe {
+  width: 40%;
+  height: 5px;
+  background-color: rgb(0, 0, 0);
+}
+
+.center-circle {
+  padding: 0.7rem;
+  background-color: rgb(255, 255, 255);
+  border-radius: 50%;
+  border: 5px solid rgb(0, 0, 0);
+}
+
+/* end of pokeball card */

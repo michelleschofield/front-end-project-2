@@ -1,5 +1,5 @@
 'use strict';
-const views = [
+const menuViews = [
   'home',
   'study sets',
   'flashcards',
@@ -13,15 +13,49 @@ const $tabHolder = document.querySelector('.tabs');
 const $closeMenuButton = document.querySelector('.close-menu');
 const $openMenuButton = document.querySelector('.open-menu');
 const $views = document.querySelectorAll('.view');
+const $newSetButton = document.querySelector('#new-set');
+const $viewSetsButton = document.querySelector('#to-sets');
+const $setsHolder = document.querySelector('#sets-holder');
 if (!$menu) throw new Error('$menu query failed');
 if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
 if (!$openMenuButton) throw new Error('$openMenuButton query failed');
-document.addEventListener('DOMContentLoaded', () => viewSwap(data.currentView));
+if (!$newSetButton) throw new Error('$newSetButton query failed');
+if (!$viewSetsButton) throw new Error('$viewSetsButton query failed');
+if (!$setsHolder) throw new Error('$setsHolder query failed');
+document.addEventListener('DOMContentLoaded', () => {
+  viewSwap(data.currentView);
+  setUpSets();
+});
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
 $tabHolder.addEventListener('click', handleMenuInteraction);
+$newSetButton.addEventListener('click', () => {
+  console.log('click!');
+  viewStudySet(data.sets[0]);
+});
+$viewSetsButton.addEventListener('click', () => viewSwap('study sets'));
 buildMenu();
+function setUpSets() {
+  console.log('setting up sets');
+  const sets = data.sets;
+  if (!sets.length) {
+    showNoSets();
+    console.log('no sets');
+  }
+}
+function showNoSets() {
+  if (!$setsHolder) throw new Error('$setsHolder does not exist');
+  const $noSetsText = document.createElement('h3');
+  $noSetsText.textContent =
+    "It appears you don't have any sets, you can make your first one above";
+  $noSetsText.className = 'text-center no-sets';
+  $setsHolder.appendChild($noSetsText);
+}
+function viewStudySet(studySet) {
+  viewSwap('specific set');
+  console.log('studySet:', studySet);
+}
 function handleMenuInteraction(event) {
   const $eventTarget = event.target;
   let $tab;
@@ -56,12 +90,12 @@ function closeMenu() {
   $menu.className = 'menu row dir-column hidden';
 }
 function buildMenu() {
-  views.forEach((view) => {
+  menuViews.forEach((menuView) => {
     const $tab = document.createElement('div');
     const $text = document.createElement('h2');
-    $text.textContent = capitalizeAllWords(view);
+    $text.textContent = capitalizeAllWords(menuView);
     $tab.className = 'tab';
-    $tab.setAttribute('data-view', view);
+    $tab.setAttribute('data-view', menuView);
     $tab.appendChild($text);
     $tabHolder?.appendChild($tab);
   });

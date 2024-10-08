@@ -57,6 +57,11 @@ header {
   align-self: flex-end;
 }
 
+.all-sets {
+  color: rgb(142, 142, 142);
+  font-size: 1.5rem;
+}
+
 .menu {
   background-color: rgb(255, 42, 40);
   color: white;
@@ -95,4 +100,12 @@ header {
 
 .to-bottom {
   height: 100%;
+}
+
+.gray-text {
+  color: rgb(142, 142, 142);
+}
+
+.no-sets {
+  padding: 1rem;
 }

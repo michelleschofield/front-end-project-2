@@ -29,7 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
   viewSwap(data.currentView);
   setUpSets();
   if (data.editingCard) {
+    console.log('editing');
+    openCardEditor(data.editingCard.cardId);
   } else if (data.viewingStudySet) {
+    console.log('not editing');
     viewStudySet(data.viewingStudySet);
   }
 });
@@ -161,16 +164,24 @@ function renderBackRow(text, buttonCallback) {
 }
 function openCardEditor(cardId) {
   if (!$cardEditor) throw new Error('$cardEditor does not exist');
-  const setName = data.viewingStudySet?.setName;
-  if (!setName) throw new Error('Cannot edit card if not viewing set');
+  const studySet = data.viewingStudySet;
+  if (!studySet) throw new Error('Cannot edit card if not viewing set');
+  const currentCard = studySet.cards.find((card) => card.cardId === cardId);
+  if (!currentCard) {
+    throw new Error('card id does not match any cards in study set');
+  }
+  data.editingCard = currentCard;
   viewSwap('specific-card');
-  const $backRow = renderBackRow(setName, () => {
+  const $backRow = renderBackRow(studySet.setName, () => {
     data.editingCard = null;
     $cardEditor.replaceChildren();
     viewSwap('specific-set');
   });
   const $container = document.createElement('div');
+  const $cardFrontEditor = document.createElement('div');
+  const $cardBackEditor = document.createElement('div');
   $container.className = 'row wrap';
+  $container.append($cardFrontEditor, $cardBackEditor);
   $cardEditor.append($backRow, $container);
 }
 function renderTextSideOfCard(text) {

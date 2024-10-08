@@ -126,15 +126,28 @@ function viewStudySet(studySet: StudySet): void {
 }
 
 function renderBothSidesOfCard(card: Card): HTMLDivElement {
-  const { pokemonName, pokemonImg } = card;
+  const { pokemonName, pokemonImg, info } = card;
 
   const $holder = document.createElement('div');
 
   const $frontSide = renderPokemonSideOfCard(pokemonName, pokemonImg);
+  const $backSide = renderTextSideOfCard(info);
 
-  $holder.append($frontSide);
+  $holder.append($frontSide, $backSide);
 
   return $holder;
+}
+
+function renderTextSideOfCard(text: string): HTMLDivElement {
+  const $card = document.createElement('div');
+  const $text = document.createElement('p');
+
+  $card.className = 'card';
+  $text.textContent = text;
+
+  $card.append($text);
+
+  return $card;
 }
 
 function renderPokemonSideOfCard(

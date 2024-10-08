@@ -49,7 +49,7 @@ function handleSetsClick(event) {
   if ($eventTarget.matches('.row')) {
     return;
   }
-  let $row = $eventTarget.closest('.row');
+  const $row = $eventTarget.closest('.row');
   const setId = $row?.getAttribute('data-set-id');
   if (!setId) return;
   const studySet = data.sets.find((studySet) => studySet.id === +setId);
@@ -89,7 +89,7 @@ function showNoSets() {
   $setsHolder.appendChild($noSetsText);
 }
 function viewStudySet(studySet) {
-  const { setName, id, cards } = studySet;
+  const { setName, cards } = studySet;
   data.viewingStudySet = studySet;
   viewSwap('specific set');
   if (!$viewingSet) throw new Error('$viewingSet does not exist');
@@ -101,11 +101,20 @@ function viewStudySet(studySet) {
   });
 }
 function renderBothSidesOfCard(card) {
-  const { pokemonName, pokemonImg } = card;
+  const { pokemonName, pokemonImg, info } = card;
   const $holder = document.createElement('div');
   const $frontSide = renderPokemonSideOfCard(pokemonName, pokemonImg);
-  $holder.append($frontSide);
+  const $backSide = renderTextSideOfCard(info);
+  $holder.append($frontSide, $backSide);
   return $holder;
+}
+function renderTextSideOfCard(text) {
+  const $card = document.createElement('div');
+  const $text = document.createElement('p');
+  $card.className = 'card';
+  $text.textContent = text;
+  $card.append($text);
+  return $card;
 }
 function renderPokemonSideOfCard(name, imageURL) {
   const $card = document.createElement('div');

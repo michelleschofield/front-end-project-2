@@ -42,7 +42,7 @@ function readData(): Data {
             {
               pokemonName: 'bulbasaur',
               pokemonId: 1,
-              infoType: 'flavor_text',
+              infoType: 'text',
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
@@ -56,7 +56,7 @@ function readData(): Data {
             {
               pokemonName: 'bulby boy',
               pokemonId: 1,
-              infoType: 'flavor_text',
+              infoType: 'text',
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',

@@ -125,10 +125,15 @@ header {
   align-items: center;
   background-color: rgb(239, 239, 239);
   box-shadow: 0 4px 5px 0 rgb(142, 142, 142);
-  width: 10rem;
-  height: 14rem;
+  width: 9rem;
+  height: 13rem;
+  padding: 0.5rem;
 }
 
 .card-image {
-  width: 90%;
+  width: 100%;
+}
+
+.small-text {
+  font-size: small;
 }

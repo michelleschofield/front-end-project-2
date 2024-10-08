@@ -129,13 +129,38 @@ function renderBothSidesOfCard(card: Card): HTMLDivElement {
   const { pokemonName, pokemonImg, info } = card;
 
   const $holder = document.createElement('div');
+  $holder.className = 'row horz-padding space-between';
 
-  const $frontSide = renderPokemonSideOfCard(pokemonName, pokemonImg);
+  const $frontSide = renderPokemonSideOfCard(
+    capitalizeWord(pokemonName),
+    pokemonImg,
+  );
   const $backSide = renderTextSideOfCard(info);
+  const $buttons = renderTrashAndEdit();
 
-  $holder.append($frontSide, $backSide);
+  $holder.append($frontSide, $backSide, $buttons);
 
   return $holder;
+}
+
+function renderTrashAndEdit(): HTMLDivElement {
+  const $buttonHolder = document.createElement('div');
+  const $editButton = document.createElement('button');
+  const $trashButton = document.createElement('button');
+  const $editIcon = document.createElement('i');
+  const $trashIcon = document.createElement('i');
+
+  $buttonHolder.className = 'row dir-column small-text justify-center';
+  $editButton.className = 'icon-button gray-text';
+  $trashButton.className = 'icon-button gray-text';
+  $editIcon.className = 'fa-solid fa-pen-to-square';
+  $trashIcon.className = 'fa-solid fa-trash-can';
+
+  $editButton.append($editIcon);
+  $trashButton.append($trashIcon);
+  $buttonHolder.append($editButton, $trashButton);
+
+  return $buttonHolder;
 }
 
 function renderTextSideOfCard(text: string): HTMLDivElement {

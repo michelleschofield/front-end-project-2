@@ -145,6 +145,11 @@ header {
   width: 100%;
 }
 
+.pokemon-name-editing {
+  font-size: x-large;
+  padding: 0.5rem;
+}
+
 /* pokeball card */
 
 .card.pokeball {

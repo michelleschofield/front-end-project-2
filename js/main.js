@@ -29,10 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
   viewSwap(data.currentView);
   setUpSets();
   if (data.editingCard) {
-    console.log('editing');
     openCardEditor(data.editingCard.cardId);
   } else if (data.viewingStudySet) {
-    console.log('not editing');
     viewStudySet(data.viewingStudySet);
   }
 });
@@ -90,13 +88,13 @@ function showNoSets() {
   $setsHolder.appendChild($noSetsText);
 }
 function viewStudySet(studySet) {
+  if (!$viewingSet) throw new Error('$viewingSet does not exist');
   const { setName, cards } = studySet;
   data.viewingStudySet = studySet;
   viewSwap('specific-set');
-  if (!$viewingSet) throw new Error('$viewingSet does not exist');
+  $viewingSet.replaceChildren();
   const $backRow = renderBackRow('All Sets', () => {
     data.viewingStudySet = null;
-    $viewingSet.replaceChildren();
     viewSwap('study sets');
   });
   const $titleRow = renderTitleRow(setName);
@@ -164,6 +162,7 @@ function renderBackRow(text, buttonCallback) {
 }
 function openCardEditor(cardId) {
   if (!$cardEditor) throw new Error('$cardEditor does not exist');
+  $cardEditor.replaceChildren();
   const studySet = data.viewingStudySet;
   if (!studySet) throw new Error('Cannot edit card if not viewing set');
   const currentCard = studySet.cards.find((card) => card.cardId === cardId);
@@ -174,15 +173,38 @@ function openCardEditor(cardId) {
   viewSwap('specific-card');
   const $backRow = renderBackRow(studySet.setName, () => {
     data.editingCard = null;
-    $cardEditor.replaceChildren();
-    viewSwap('specific-set');
+    if (!data.viewingStudySet) {
+      throw new Error('cannot view non existent study set');
+    }
+    viewStudySet(data.viewingStudySet);
   });
   const $container = document.createElement('div');
-  const $cardFrontEditor = document.createElement('div');
+  const $cardFrontEditor = renderFrontSideEditor(currentCard);
   const $cardBackEditor = document.createElement('div');
   $container.className = 'row wrap';
   $container.append($cardFrontEditor, $cardBackEditor);
   $cardEditor.append($backRow, $container);
+}
+function renderFrontSideEditor(card) {
+  const $cardFrontEditor = document.createElement('div');
+  const $titleRow = document.createElement('div');
+  const $pokemonLabel = document.createElement('h2');
+  const $pokemonName = document.createElement('p');
+  const $changePokemonButton = document.createElement('button');
+  const $pencilIcon = document.createElement('i');
+  const $card = renderPokemonSideOfCard(card.pokemonName, card.pokemonImg);
+  $cardFrontEditor.className = 'row dir-column horz-padding align-center';
+  $titleRow.className = 'row align-center col-full justify-center';
+  $pokemonLabel.textContent = 'Pokemon:';
+  $pokemonName.textContent = capitalizeWord(card.pokemonName);
+  $pokemonName.className = 'pokemon-name-editing';
+  $changePokemonButton.className = 'icon-button gray-text sm-icon';
+  $changePokemonButton.textContent = 'Change Pokemon';
+  $pencilIcon.className = 'fa-solid fa-pencil';
+  $changePokemonButton.prepend($pencilIcon);
+  $titleRow.append($pokemonLabel, $pokemonName);
+  $cardFrontEditor.append($titleRow, $card, $changePokemonButton);
+  return $cardFrontEditor;
 }
 function renderTextSideOfCard(text) {
   const $card = document.createElement('div');
@@ -200,7 +222,7 @@ function renderPokemonSideOfCard(name, imageURL) {
   $card.className = 'card';
   $imageWrapper.className = 'card-image';
   $image.setAttribute('src', imageURL);
-  $name.textContent = name;
+  $name.textContent = capitalizeWord(name);
   $imageWrapper.append($image);
   $card.append($imageWrapper, $name);
   return $card;

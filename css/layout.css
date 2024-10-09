@@ -37,3 +37,7 @@ img {
 .space-between {
   justify-content: space-between;
 }
+
+.col-full {
+  width: 100%;
+}

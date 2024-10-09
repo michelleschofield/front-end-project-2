@@ -43,10 +43,25 @@ $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
 $tabHolder.addEventListener('click', handleMenuInteraction);
 $newSetButton.addEventListener('click', () => {
-  console.log('click!');
-  viewStudySet(data.sets[0]);
+  createNewSet();
 });
 $setsHolder.addEventListener('click', handleSetsClick);
+
+function createNewSet(): void {
+  const setId = data.nextSetId;
+
+  const studySet = {
+    setName: 'New Set',
+    id: setId,
+    cards: [],
+    nextCardId: 1,
+  };
+
+  data.sets.push(studySet);
+  data.nextSetId++;
+
+  viewStudySet(studySet);
+}
 
 function handleSetsClick(event: Event): void {
   const $eventTarget = event.target as HTMLElement;
@@ -66,6 +81,11 @@ function handleSetsClick(event: Event): void {
 }
 
 function setUpSets(): void {
+  if (!$setsHolder) {
+    throw new Error('$setsHolder does not exist');
+  }
+  $setsHolder.replaceChildren();
+
   const sets = data.sets;
   if (!sets.length) {
     showNoSets();
@@ -73,7 +93,7 @@ function setUpSets(): void {
 
   sets.forEach((studySet) => {
     const $row = renderSetName(studySet);
-    $setsHolder?.append($row);
+    $setsHolder.append($row);
   });
 }
 
@@ -114,8 +134,8 @@ function viewStudySet(studySet: StudySet): void {
   viewSwap('specific-set');
   $viewingSet.replaceChildren();
 
-  const $backRow = renderBackRow('All Sets', exitStudySets);
-  const $titleRow = renderTitleRow(setName);
+  const $backRow = renderBackRow('All Sets', exitStudySet);
+  const $titleRow = renderChangingTitleRow(setName);
   const $cardsContainer = document.createElement('div');
 
   $cardsContainer.className = 'row wrap';
@@ -128,8 +148,9 @@ function viewStudySet(studySet: StudySet): void {
   });
 }
 
-function exitStudySets(): void {
+function exitStudySet(): void {
   data.viewingStudySet = null;
+  setUpSets();
   viewSwap('study sets');
 }
 
@@ -269,6 +290,10 @@ function openCardEditor(cardId: number): void {
 
   $container.append($cardFrontEditor, $cardBackEditor);
   $cardEditor.append($backRow, $container);
+
+  $cardBackEditor.addEventListener('change', () => {
+    console.log('change');
+  });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -282,7 +307,7 @@ function getFlavorText(pokemonData: PokemonSpecies): string[] {
 
   const textArrayUnique = removeDuplicates(textArray);
 
-  return textArrayUnique as string[];
+  return textArrayUnique;
 }
 
 function extractProperty<T extends object, K extends keyof T>(
@@ -299,7 +324,7 @@ function extractProperty<T extends object, K extends keyof T>(
   });
 }
 
-function removeDuplicates(array: unknown[]): unknown[] {
+function removeDuplicates<T>(array: T[]): T[] {
   return [...new Set(array)];
 }
 
@@ -350,7 +375,11 @@ function renderInfoDropdown(): HTMLDivElement {
   const $infoLabel = document.createElement('h2');
   const $infoSelector = document.createElement('select');
   const $infoMessage = document.createElement('p');
-  const $option1 = document.createElement('option');
+
+  const $pokedex = document.createElement('option');
+  const $evolvesFrom = document.createElement('option');
+  const $evolvesTo = document.createElement('option');
+  const $types = document.createElement('option');
 
   $infoTypeHolder.className = 'row dir-column';
 
@@ -360,14 +389,23 @@ function renderInfoDropdown(): HTMLDivElement {
   $infoSelector.className = 'col-full gray-text dropdown';
   $infoSelector.setAttribute('id', 'info-type');
 
-  $option1.textContent = 'Pokedex Entry';
-  $option1.setAttribute('value', 'flavor_text');
+  $pokedex.textContent = 'Pokedex Entry';
+  $pokedex.setAttribute('value', 'flavor_text');
+
+  $evolvesFrom.textContent = 'Evolves From';
+  $evolvesFrom.setAttribute('value', 'evolves_from');
+
+  $evolvesTo.textContent = 'Evolves To';
+  $evolvesTo.setAttribute('value', 'evolves_to');
+
+  $types.textContent = 'Type(s)';
+  $types.setAttribute('value', 'types');
 
   $infoMessage.textContent =
     'The information you want to associate with the pokemon';
   $infoMessage.className = 'gray-text';
 
-  $infoSelector.append($option1);
+  $infoSelector.append($pokedex, $evolvesFrom, $evolvesTo, $types);
   $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
 
   return $infoTypeHolder;
@@ -480,6 +518,7 @@ function renderPokemonSideOfCard(
   return $card;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function renderTitleRow(title: string): HTMLDivElement {
   const $titleRow = document.createElement('div');
   const $title = document.createElement('h2');
@@ -496,7 +535,38 @@ function renderTitleRow(title: string): HTMLDivElement {
   $changeTitleButton.prepend($pencilIcon);
   $titleRow.append($title, $changeTitleButton);
 
+  $changeTitleButton.addEventListener('click', () => {
+    changeTitle();
+  });
+
   return $titleRow;
+}
+
+function renderChangingTitleRow(currentTitle: string): HTMLDivElement {
+  const $titleRow = document.createElement('div');
+  const $title = document.createElement('input');
+  const $changeTitleButton = document.createElement('button');
+
+  $title.setAttribute('value', currentTitle);
+  $changeTitleButton.textContent = 'Save Title';
+  $changeTitleButton.className = 'icon-button gray-text change-title';
+  $titleRow.className = 'row space-between align-center horz-padding';
+
+  $titleRow.append($title, $changeTitleButton);
+
+  $changeTitleButton.addEventListener('click', () => {
+    saveChangedTitle();
+  });
+
+  return $titleRow;
+}
+
+function changeTitle(): void {
+  console.log('change title');
+}
+
+function saveChangedTitle(): void {
+  console.log('saved');
 }
 
 function handleMenuInteraction(event: Event): void {

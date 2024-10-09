@@ -27,6 +27,13 @@ header {
   z-index: 1;
 }
 
+input {
+  font-family: Quicksand, serif;
+  font-size: large;
+  border: solid 1px rgb(142, 142, 142);
+  border-radius: 5px;
+}
+
 .small-text {
   font-size: small;
 }

@@ -29,10 +29,21 @@ $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
 $tabHolder.addEventListener('click', handleMenuInteraction);
 $newSetButton.addEventListener('click', () => {
-  console.log('click!');
-  viewStudySet(data.sets[0]);
+  createNewSet();
 });
 $setsHolder.addEventListener('click', handleSetsClick);
+function createNewSet() {
+  const setId = data.nextSetId;
+  const studySet = {
+    setName: 'New Set',
+    id: setId,
+    cards: [],
+    nextCardId: 1,
+  };
+  data.sets.push(studySet);
+  data.nextSetId++;
+  viewStudySet(studySet);
+}
 function handleSetsClick(event) {
   const $eventTarget = event.target;
   if ($eventTarget.matches('.row')) {
@@ -46,13 +57,17 @@ function handleSetsClick(event) {
   viewStudySet(studySet);
 }
 function setUpSets() {
+  if (!$setsHolder) {
+    throw new Error('$setsHolder does not exist');
+  }
+  $setsHolder.replaceChildren();
   const sets = data.sets;
   if (!sets.length) {
     showNoSets();
   }
   sets.forEach((studySet) => {
     const $row = renderSetName(studySet);
-    $setsHolder?.append($row);
+    $setsHolder.append($row);
   });
 }
 function renderSetName(studySet) {
@@ -83,8 +98,8 @@ function viewStudySet(studySet) {
   data.viewingStudySet = studySet;
   viewSwap('specific-set');
   $viewingSet.replaceChildren();
-  const $backRow = renderBackRow('All Sets', exitStudySets);
-  const $titleRow = renderTitleRow(setName);
+  const $backRow = renderBackRow('All Sets', exitStudySet);
+  const $titleRow = renderChangingTitleRow(setName);
   const $cardsContainer = document.createElement('div');
   $cardsContainer.className = 'row wrap';
   $viewingSet.append($backRow, $titleRow, $cardsContainer);
@@ -93,8 +108,9 @@ function viewStudySet(studySet) {
     $cardsContainer.append(renderedCard);
   });
 }
-function exitStudySets() {
+function exitStudySet() {
   data.viewingStudySet = null;
+  setUpSets();
   viewSwap('study sets');
 }
 function renderBothSidesOfCard(card) {
@@ -198,6 +214,9 @@ function openCardEditor(cardId) {
   $container.className = 'row wrap';
   $container.append($cardFrontEditor, $cardBackEditor);
   $cardEditor.append($backRow, $container);
+  $cardBackEditor.addEventListener('change', () => {
+    console.log('change');
+  });
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getFlavorText(pokemonData) {
@@ -257,18 +276,27 @@ function renderInfoDropdown() {
   const $infoLabel = document.createElement('h2');
   const $infoSelector = document.createElement('select');
   const $infoMessage = document.createElement('p');
-  const $option1 = document.createElement('option');
+  const $pokedex = document.createElement('option');
+  const $evolvesFrom = document.createElement('option');
+  const $evolvesTo = document.createElement('option');
+  const $types = document.createElement('option');
   $infoTypeHolder.className = 'row dir-column';
   $infoLabel.textContent = 'Info';
   $infoLabel.setAttribute('for', 'info-type');
   $infoSelector.className = 'col-full gray-text dropdown';
   $infoSelector.setAttribute('id', 'info-type');
-  $option1.textContent = 'Pokedex Entry';
-  $option1.setAttribute('value', 'flavor_text');
+  $pokedex.textContent = 'Pokedex Entry';
+  $pokedex.setAttribute('value', 'flavor_text');
+  $evolvesFrom.textContent = 'Evolves From';
+  $evolvesFrom.setAttribute('value', 'evolves_from');
+  $evolvesTo.textContent = 'Evolves To';
+  $evolvesTo.setAttribute('value', 'evolves_to');
+  $types.textContent = 'Type(s)';
+  $types.setAttribute('value', 'types');
   $infoMessage.textContent =
     'The information you want to associate with the pokemon';
   $infoMessage.className = 'gray-text';
-  $infoSelector.append($option1);
+  $infoSelector.append($pokedex, $evolvesFrom, $evolvesTo, $types);
   $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
   return $infoTypeHolder;
 }
@@ -352,6 +380,7 @@ function renderPokemonSideOfCard(name, imageURL) {
   $card.append($imageWrapper, $name);
   return $card;
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function renderTitleRow(title) {
   const $titleRow = document.createElement('div');
   const $title = document.createElement('h2');
@@ -364,7 +393,30 @@ function renderTitleRow(title) {
   $titleRow.className = 'row space-between align-center horz-padding';
   $changeTitleButton.prepend($pencilIcon);
   $titleRow.append($title, $changeTitleButton);
+  $changeTitleButton.addEventListener('click', () => {
+    changeTitle();
+  });
   return $titleRow;
+}
+function renderChangingTitleRow(currentTitle) {
+  const $titleRow = document.createElement('div');
+  const $title = document.createElement('input');
+  const $changeTitleButton = document.createElement('button');
+  $title.setAttribute('value', currentTitle);
+  $changeTitleButton.textContent = 'Save Title';
+  $changeTitleButton.className = 'icon-button gray-text change-title';
+  $titleRow.className = 'row space-between align-center horz-padding';
+  $titleRow.append($title, $changeTitleButton);
+  $changeTitleButton.addEventListener('click', () => {
+    saveChangedTitle();
+  });
+  return $titleRow;
+}
+function changeTitle() {
+  console.log('change title');
+}
+function saveChangedTitle() {
+  console.log('saved');
 }
 function handleMenuInteraction(event) {
   const $eventTarget = event.target;

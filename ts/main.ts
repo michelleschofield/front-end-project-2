@@ -114,10 +114,7 @@ function viewStudySet(studySet: StudySet): void {
   viewSwap('specific-set');
   $viewingSet.replaceChildren();
 
-  const $backRow = renderBackRow('All Sets', () => {
-    data.viewingStudySet = null;
-    viewSwap('study sets');
-  });
+  const $backRow = renderBackRow('All Sets', exitStudySets);
   const $titleRow = renderTitleRow(setName);
   const $cardsContainer = document.createElement('div');
 
@@ -129,6 +126,11 @@ function viewStudySet(studySet: StudySet): void {
     const renderedCard = renderBothSidesOfCard(card);
     $cardsContainer.append(renderedCard);
   });
+}
+
+function exitStudySets(): void {
+  data.viewingStudySet = null;
+  viewSwap('study sets');
 }
 
 function renderBothSidesOfCard(card: Card): HTMLDivElement {
@@ -174,10 +176,10 @@ function renderTrashAndEdit(cardId: number): HTMLDivElement {
   const $trashIcon = document.createElement('i');
 
   $editButton.addEventListener('click', () => {
-    openCardEditor(cardId);
+    editButtonListener(cardId);
   });
   $trashButton.addEventListener('click', () => {
-    console.log('trash!');
+    trashButtonListener(cardId);
   });
 
   $editButton.setAttribute('id', `${cardId}`);
@@ -194,6 +196,14 @@ function renderTrashAndEdit(cardId: number): HTMLDivElement {
   $buttonHolder.append($editButton, $trashButton);
 
   return $buttonHolder;
+}
+
+function trashButtonListener(cardId: number): void {
+  console.log('trash', cardId);
+}
+
+function editButtonListener(cardId: number): void {
+  openCardEditor(cardId);
 }
 
 function renderBackRow(
@@ -221,54 +231,47 @@ function renderBackRow(
   return $row;
 }
 
-async function openCardEditor(cardId: number): Promise<void> {
-  try {
-    if (!$cardEditor) {
-      throw new Error('$cardEditor does not exist');
-    }
-    $cardEditor.replaceChildren();
-
-    const studySet = data.viewingStudySet;
-
-    if (!studySet) {
-      throw new Error('Cannot edit card if not viewing set');
-    }
-
-    const currentCard = studySet.cards.find((card) => card.cardId === cardId);
-
-    if (!currentCard) {
-      throw new Error('card id does not match any cards in study set');
-    }
-
-    data.editingCard = currentCard;
-    viewSwap('specific-card');
-
-    const $backRow = renderBackRow(studySet.setName, () => {
-      data.editingCard = null;
-
-      if (!data.viewingStudySet) {
-        throw new Error('cannot view non existent study set');
-      }
-      viewStudySet(data.viewingStudySet);
-    });
-
-    const pokemonData = await getPokemonSpecies(currentCard.pokemonId);
-
-    const flavorText = getFlavorText(pokemonData);
-
-    const $container = document.createElement('div');
-    const $cardFrontEditor = renderFrontSideEditor(currentCard);
-    const $cardBackEditor = renderBackSideEditor(currentCard, flavorText);
-
-    $container.className = 'row wrap';
-
-    $container.append($cardFrontEditor, $cardBackEditor);
-    $cardEditor.append($backRow, $container);
-  } catch (error) {
-    console.log(error);
+function openCardEditor(cardId: number): void {
+  if (!$cardEditor) {
+    throw new Error('$cardEditor does not exist');
   }
+  $cardEditor.replaceChildren();
+
+  const studySet = data.viewingStudySet;
+
+  if (!studySet) {
+    throw new Error('Cannot edit card if not viewing set');
+  }
+
+  const currentCard = studySet.cards.find((card) => card.cardId === cardId);
+
+  if (!currentCard) {
+    throw new Error('card id does not match any cards in study set');
+  }
+
+  data.editingCard = currentCard;
+  viewSwap('specific-card');
+
+  const $backRow = renderBackRow(studySet.setName, () => {
+    data.editingCard = null;
+
+    if (!data.viewingStudySet) {
+      throw new Error('cannot view non existent study set');
+    }
+    viewStudySet(data.viewingStudySet);
+  });
+
+  const $container = document.createElement('div');
+  const $cardFrontEditor = renderFrontSideEditor(currentCard);
+  const $cardBackEditor = renderBackSideEditor(currentCard);
+
+  $container.className = 'row wrap';
+
+  $container.append($cardFrontEditor, $cardBackEditor);
+  $cardEditor.append($backRow, $container);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getFlavorText(pokemonData: PokemonSpecies): string[] {
   const flavorTextEntries = pokemonData.flavor_text_entries;
   const englishEntries = flavorTextEntries.filter(
@@ -300,6 +303,7 @@ function removeDuplicates(array: unknown[]): unknown[] {
   return [...new Set(array)];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getPokemonSpecies(
   idOrName: number | string,
 ): Promise<PokemonSpecies> {
@@ -315,7 +319,7 @@ async function getPokemonSpecies(
   return pokemonSpecies;
 }
 
-function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
+function renderBackSideEditor(card: Card): HTMLDivElement {
   const { infoType, info } = card;
   const { textArray, index } = info;
 
@@ -332,14 +336,21 @@ function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
   }
 
   const $backSideEditor = document.createElement('div');
+  const $cardHolder = renderEditingFlavorText(textArray[index]);
+  const $infoTypeHolder = renderInfoDropdown();
 
+  $backSideEditor.className = 'horz-padding row dir-column';
+  $backSideEditor.append($infoTypeHolder, $cardHolder);
+
+  return $backSideEditor;
+}
+
+function renderInfoDropdown(): HTMLDivElement {
   const $infoTypeHolder = document.createElement('div');
   const $infoLabel = document.createElement('h2');
   const $infoSelector = document.createElement('select');
   const $infoMessage = document.createElement('p');
   const $option1 = document.createElement('option');
-
-  $backSideEditor.className = 'horz-padding row dir-column';
 
   $infoTypeHolder.className = 'row dir-column';
 
@@ -356,8 +367,15 @@ function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
     'The information you want to associate with the pokemon';
   $infoMessage.className = 'gray-text';
 
+  $infoSelector.append($option1);
+  $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
+
+  return $infoTypeHolder;
+}
+
+function renderEditingFlavorText(text: string): HTMLDivElement {
   const $cardHolder = document.createElement('div');
-  const $card = renderTextSideOfCard(textArray[index]);
+  const $card = renderTextSideOfCard(text);
   const $leftButton = document.createElement('button');
   const $rightButton = document.createElement('button');
   const $leftIcon = document.createElement('i');
@@ -371,31 +389,14 @@ function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
   $leftIcon.className = 'fa-solid fa-chevron-left';
   $rightIcon.className = 'fa-solid fa-chevron-right';
 
-  $leftButton.addEventListener('click', () => {
-    console.log('click left');
-    if (index === undefined) {
-      throw new Error('there must an index if the info type is flavor text');
-    }
-    switchOutText(-1);
-  });
-  $rightButton.addEventListener('click', () => {
-    console.log('click right');
-    if (index === undefined) {
-      throw new Error('there must an index if the info type is flavor text');
-    }
-    switchOutText(1);
-  });
-
-  $infoSelector.append($option1);
-  $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
   $leftButton.append($leftIcon);
   $rightButton.append($rightIcon);
   $cardHolder.append($leftButton, $card, $rightButton);
-  $backSideEditor.append($infoTypeHolder, $cardHolder);
 
-  return $backSideEditor;
+  return $cardHolder;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function switchOutText(direction: number): void {
   const card = data.editingCard;
   if (!card) {
@@ -403,9 +404,9 @@ function switchOutText(direction: number): void {
       'cannot switch out text of card that is not currently displayed',
     );
   }
-  if (card.info.index === undefined) {
+  if (card.info.index === undefined || !card.info.textArray) {
     throw new Error(
-      'cannot switch out text of card that does not have an index',
+      'cannot switch out text of card that does not have an index or a textArrays',
     );
   }
   card.info.index += direction;
@@ -546,9 +547,3 @@ function closeMenu(): void {
 function capitalizeWord(word: string): string {
   return word[0].toUpperCase() + word.slice(1);
 }
-
-// function capitalizeAllWords(words: string): string {
-//   const individualWords = words.split(' ');
-//   const capitalizedWords = individualWords.map((word) => capitalizeWord(word));
-//   return capitalizedWords.join(' ');
-// }

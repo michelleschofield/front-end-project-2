@@ -145,7 +145,7 @@ function renderBothSidesOfCard(card: Card): HTMLDivElement {
   let $backSide;
 
   if (infoType === 'flavor_text') {
-    if (!info.textArray || !info.index) {
+    if (!info.textArray || info.index === undefined) {
       throw new Error(
         'if the info type is flavor text there must be a text array and index',
       );
@@ -317,14 +317,15 @@ async function getPokemonSpecies(
 
 function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
   const { infoType, info } = card;
+  const { textArray, index } = info;
 
-  if (infoType === 'flavor_text') {
+  if (infoType !== 'flavor_text') {
     throw new Error(
       'Shelly you need to come fix the renderBackSideEditor function to adapt to info types other than flavor_text!',
     );
   }
 
-  if (!info.textArray || !info.index) {
+  if (!textArray || index === undefined) {
     throw new Error(
       'if the info type is flavor text there must be a text array and index',
     );
@@ -356,7 +357,7 @@ function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
   $infoMessage.className = 'gray-text';
 
   const $cardHolder = document.createElement('div');
-  const $card = renderTextSideOfCard(info.textArray[info.index]);
+  const $card = renderTextSideOfCard(textArray[index]);
   const $leftButton = document.createElement('button');
   const $rightButton = document.createElement('button');
   const $leftIcon = document.createElement('i');
@@ -371,11 +372,18 @@ function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
   $rightIcon.className = 'fa-solid fa-chevron-right';
 
   $leftButton.addEventListener('click', () => {
-    console.log(text);
     console.log('click left');
+    if (index === undefined) {
+      throw new Error('there must an index if the info type is flavor text');
+    }
+    switchOutText(-1);
   });
   $rightButton.addEventListener('click', () => {
     console.log('click right');
+    if (index === undefined) {
+      throw new Error('there must an index if the info type is flavor text');
+    }
+    switchOutText(1);
   });
 
   $infoSelector.append($option1);
@@ -386,6 +394,27 @@ function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
   $backSideEditor.append($infoTypeHolder, $cardHolder);
 
   return $backSideEditor;
+}
+
+function switchOutText(direction: number): void {
+  const card = data.editingCard;
+  if (!card) {
+    throw new Error(
+      'cannot switch out text of card that is not currently displayed',
+    );
+  }
+  if (card.info.index === undefined) {
+    throw new Error(
+      'cannot switch out text of card that does not have an index',
+    );
+  }
+  card.info.index += direction;
+  if (card.info.index < 0) {
+    card.info.index = card.info.textArray?.length - 1;
+  } else if (card.info.index > card.info.textArray?.length - 1) {
+    card.info.index = 0;
+  }
+  writeData();
 }
 
 function renderFrontSideEditor(card: Card): HTMLDivElement {

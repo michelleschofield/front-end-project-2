@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 const $menu = document.querySelector('.menu');
 const $tabHolder = document.querySelector('.tabs');
 const $closeMenuButton = document.querySelector('.close-menu');
@@ -8,373 +8,403 @@ const $newSetButton = document.querySelector('#new-set');
 const $setsHolder = document.querySelector('#sets-holder');
 const $viewingSet = document.querySelector('#viewing-set');
 const $cardEditor = document.querySelector('[data-view="specific-card"]');
-if (!$menu) throw new Error('$menu query failed');
-if (!$tabHolder) throw new Error('$tabHolder query failed');
-if (!$closeMenuButton) throw new Error('$closeMenu query failed');
-if (!$openMenuButton) throw new Error('$openMenuButton query failed');
-if (!$newSetButton) throw new Error('$newSetButton query failed');
-if (!$setsHolder) throw new Error('$setsHolder query failed');
-if (!$viewingSet) throw new Error('$viewingSet query failed');
-if (!$cardEditor) throw new Error('$cardEditor query failed');
+if (!$menu)
+    throw new Error('$menu query failed');
+if (!$tabHolder)
+    throw new Error('$tabHolder query failed');
+if (!$closeMenuButton)
+    throw new Error('$closeMenu query failed');
+if (!$openMenuButton)
+    throw new Error('$openMenuButton query failed');
+if (!$newSetButton)
+    throw new Error('$newSetButton query failed');
+if (!$setsHolder)
+    throw new Error('$setsHolder query failed');
+if (!$viewingSet)
+    throw new Error('$viewingSet query failed');
+if (!$cardEditor)
+    throw new Error('$cardEditor query failed');
 document.addEventListener('DOMContentLoaded', () => {
-  viewSwap(data.currentView);
-  setUpSets();
-  if (data.editingCard) {
-    openCardEditor(data.editingCard.cardId);
-  } else if (data.viewingStudySet) {
-    viewStudySet(data.viewingStudySet);
-  }
+    viewSwap(data.currentView);
+    setUpSets();
+    if (data.editingCard) {
+        openCardEditor(data.editingCard.cardId);
+    }
+    else if (data.viewingStudySet) {
+        viewStudySet(data.viewingStudySet);
+    }
 });
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
 $tabHolder.addEventListener('click', handleMenuInteraction);
 $newSetButton.addEventListener('click', () => {
-  console.log('click!');
-  viewStudySet(data.sets[0]);
+    console.log('click!');
+    viewStudySet(data.sets[0]);
 });
 $setsHolder.addEventListener('click', handleSetsClick);
 function handleSetsClick(event) {
-  const $eventTarget = event.target;
-  if ($eventTarget.matches('.row')) {
-    return;
-  }
-  const $row = $eventTarget.closest('.row');
-  const setId = $row?.getAttribute('data-set-id');
-  if (!setId) return;
-  const studySet = data.sets.find((studySet) => studySet.id === +setId);
-  if (!studySet) throw new Error(`no study sets match the id ${setId}`);
-  viewStudySet(studySet);
+    const $eventTarget = event.target;
+    if ($eventTarget.matches('.row')) {
+        return;
+    }
+    const $row = $eventTarget.closest('.row');
+    const setId = $row?.getAttribute('data-set-id');
+    if (!setId)
+        return;
+    const studySet = data.sets.find((studySet) => studySet.id === +setId);
+    if (!studySet)
+        throw new Error(`no study sets match the id ${setId}`);
+    viewStudySet(studySet);
 }
 function setUpSets() {
-  const sets = data.sets;
-  if (!sets.length) {
-    showNoSets();
-  }
-  sets.forEach((studySet) => {
-    const $row = renderSetName(studySet);
-    $setsHolder?.append($row);
-  });
+    const sets = data.sets;
+    if (!sets.length) {
+        showNoSets();
+    }
+    sets.forEach((studySet) => {
+        const $row = renderSetName(studySet);
+        $setsHolder?.append($row);
+    });
 }
 function renderSetName(studySet) {
-  const $row = document.createElement('div');
-  const $setName = document.createElement('h2');
-  const $viewSetButton = document.createElement('button');
-  const $arrowIcon = document.createElement('i');
-  $row.className = 'row align-center justify-right';
-  $row.setAttribute('data-set-id', `${studySet.id}`);
-  $setName.textContent = studySet.setName;
-  $viewSetButton.className = 'icon-button';
-  $arrowIcon.className = 'fa-solid fa-arrow-right';
-  $viewSetButton.appendChild($arrowIcon);
-  $row.append($setName, $viewSetButton);
-  return $row;
+    const $row = document.createElement('div');
+    const $setName = document.createElement('h2');
+    const $viewSetButton = document.createElement('button');
+    const $arrowIcon = document.createElement('i');
+    $row.className = 'row align-center justify-right';
+    $row.setAttribute('data-set-id', `${studySet.id}`);
+    $setName.textContent = studySet.setName;
+    $viewSetButton.className = 'icon-button';
+    $arrowIcon.className = 'fa-solid fa-arrow-right';
+    $viewSetButton.appendChild($arrowIcon);
+    $row.append($setName, $viewSetButton);
+    return $row;
 }
 function showNoSets() {
-  if (!$setsHolder) throw new Error('$setsHolder does not exist');
-  const $noSetsText = document.createElement('h3');
-  $noSetsText.textContent =
-    "It appears you don't have any sets, you can make your first one above";
-  $noSetsText.className = 'text-center no-sets';
-  $setsHolder.appendChild($noSetsText);
+    if (!$setsHolder)
+        throw new Error('$setsHolder does not exist');
+    const $noSetsText = document.createElement('h3');
+    $noSetsText.textContent =
+        "It appears you don't have any sets, you can make your first one above";
+    $noSetsText.className = 'text-center no-sets';
+    $setsHolder.appendChild($noSetsText);
 }
 function viewStudySet(studySet) {
-  if (!$viewingSet) throw new Error('$viewingSet does not exist');
-  const { setName, cards } = studySet;
-  data.viewingStudySet = studySet;
-  viewSwap('specific-set');
-  $viewingSet.replaceChildren();
-  const $backRow = renderBackRow('All Sets', () => {
-    data.viewingStudySet = null;
-    viewSwap('study sets');
-  });
-  const $titleRow = renderTitleRow(setName);
-  const $cardsContainer = document.createElement('div');
-  $cardsContainer.className = 'row wrap';
-  $viewingSet.append($backRow, $titleRow, $cardsContainer);
-  cards.forEach((card) => {
-    const renderedCard = renderBothSidesOfCard(card);
-    $cardsContainer.append(renderedCard);
-  });
+    if (!$viewingSet)
+        throw new Error('$viewingSet does not exist');
+    const { setName, cards } = studySet;
+    data.viewingStudySet = studySet;
+    viewSwap('specific-set');
+    $viewingSet.replaceChildren();
+    const $backRow = renderBackRow('All Sets', () => {
+        data.viewingStudySet = null;
+        viewSwap('study sets');
+    });
+    const $titleRow = renderTitleRow(setName);
+    const $cardsContainer = document.createElement('div');
+    $cardsContainer.className = 'row wrap';
+    $viewingSet.append($backRow, $titleRow, $cardsContainer);
+    cards.forEach((card) => {
+        const renderedCard = renderBothSidesOfCard(card);
+        $cardsContainer.append(renderedCard);
+    });
 }
 function renderBothSidesOfCard(card) {
-  const { pokemonName, pokemonImg, infoType, info, cardId } = card;
-  const $holder = document.createElement('div');
-  $holder.className = 'row horz-padding';
-  const $frontSide = renderPokemonSideOfCard(
-    capitalizeWord(pokemonName),
-    pokemonImg,
-  );
-  let $backSide;
-  if (infoType === 'flavor_text') {
-    if (!info.textArray || !info.index) {
-      throw new Error(
-        'if the info type is flavor text there must be a text array and index',
-      );
+    const { pokemonName, pokemonImg, infoType, info, cardId } = card;
+    const $holder = document.createElement('div');
+    $holder.className = 'row horz-padding';
+    const $frontSide = renderPokemonSideOfCard(capitalizeWord(pokemonName), pokemonImg);
+    let $backSide;
+    if (infoType === 'flavor_text') {
+        if (!info.textArray || info.index === undefined) {
+            throw new Error('if the info type is flavor text there must be a text array and index');
+        }
+        $backSide = renderTextSideOfCard(info.textArray[info.index]);
     }
-    $backSide = renderTextSideOfCard(info.textArray[info.index]);
-  }
-  if (!$backSide) {
-    throw new Error(
-      'Shelly you need to come fix the renderBothSidesOfCard function to adapt to info types other than flavor_text!',
-    );
-  }
-  const $buttons = renderTrashAndEdit(cardId);
-  $holder.append($frontSide, $backSide, $buttons);
-  return $holder;
+    if (!$backSide) {
+        throw new Error('Shelly you need to come fix the renderBothSidesOfCard function to adapt to info types other than flavor_text!');
+    }
+    const $buttons = renderTrashAndEdit(cardId);
+    $holder.append($frontSide, $backSide, $buttons);
+    return $holder;
 }
 function renderTrashAndEdit(cardId) {
-  const $buttonHolder = document.createElement('div');
-  const $editButton = document.createElement('button');
-  const $trashButton = document.createElement('button');
-  const $editIcon = document.createElement('i');
-  const $trashIcon = document.createElement('i');
-  $editButton.addEventListener('click', () => {
-    openCardEditor(cardId);
-  });
-  $trashButton.addEventListener('click', () => {
-    console.log('trash!');
-  });
-  $editButton.setAttribute('id', `${cardId}`);
-  $trashButton.setAttribute('id', `${cardId}`);
-  $buttonHolder.className = 'row dir-column small-text justify-center';
-  $editButton.className = 'icon-button gray-text';
-  $trashButton.className = 'icon-button gray-text';
-  $editIcon.className = 'fa-solid fa-pen-to-square';
-  $trashIcon.className = 'fa-solid fa-trash-can';
-  $editButton.append($editIcon);
-  $trashButton.append($trashIcon);
-  $buttonHolder.append($editButton, $trashButton);
-  return $buttonHolder;
+    const $buttonHolder = document.createElement('div');
+    const $editButton = document.createElement('button');
+    const $trashButton = document.createElement('button');
+    const $editIcon = document.createElement('i');
+    const $trashIcon = document.createElement('i');
+    $editButton.addEventListener('click', () => {
+        openCardEditor(cardId);
+    });
+    $trashButton.addEventListener('click', () => {
+        console.log('trash!');
+    });
+    $editButton.setAttribute('id', `${cardId}`);
+    $trashButton.setAttribute('id', `${cardId}`);
+    $buttonHolder.className = 'row dir-column small-text justify-center';
+    $editButton.className = 'icon-button gray-text';
+    $trashButton.className = 'icon-button gray-text';
+    $editIcon.className = 'fa-solid fa-pen-to-square';
+    $trashIcon.className = 'fa-solid fa-trash-can';
+    $editButton.append($editIcon);
+    $trashButton.append($trashIcon);
+    $buttonHolder.append($editButton, $trashButton);
+    return $buttonHolder;
 }
 function renderBackRow(text, buttonCallback) {
-  const $row = document.createElement('div');
-  const $button = document.createElement('button');
-  const $arrow = document.createElement('i');
-  const $text = document.createElement('h3');
-  $row.className = 'row align-center bg-light-gray';
-  $button.className = 'icon-button sm-icon gray-text';
-  $arrow.className = 'fa-solid fa-arrow-left';
-  $text.className = 'gray-text';
-  $text.textContent = text;
-  $button.addEventListener('click', () => {
-    buttonCallback();
-  });
-  $button.append($arrow);
-  $row.append($button, $text);
-  return $row;
+    const $row = document.createElement('div');
+    const $button = document.createElement('button');
+    const $arrow = document.createElement('i');
+    const $text = document.createElement('h3');
+    $row.className = 'row align-center bg-light-gray';
+    $button.className = 'icon-button sm-icon gray-text';
+    $arrow.className = 'fa-solid fa-arrow-left';
+    $text.className = 'gray-text';
+    $text.textContent = text;
+    $button.addEventListener('click', () => {
+        buttonCallback();
+    });
+    $button.append($arrow);
+    $row.append($button, $text);
+    return $row;
 }
 async function openCardEditor(cardId) {
-  try {
-    if (!$cardEditor) {
-      throw new Error('$cardEditor does not exist');
+    try {
+        if (!$cardEditor) {
+            throw new Error('$cardEditor does not exist');
+        }
+        $cardEditor.replaceChildren();
+        const studySet = data.viewingStudySet;
+        if (!studySet) {
+            throw new Error('Cannot edit card if not viewing set');
+        }
+        const currentCard = studySet.cards.find((card) => card.cardId === cardId);
+        if (!currentCard) {
+            throw new Error('card id does not match any cards in study set');
+        }
+        data.editingCard = currentCard;
+        viewSwap('specific-card');
+        const $backRow = renderBackRow(studySet.setName, () => {
+            data.editingCard = null;
+            if (!data.viewingStudySet) {
+                throw new Error('cannot view non existent study set');
+            }
+            viewStudySet(data.viewingStudySet);
+        });
+        const pokemonData = await getPokemonSpecies(currentCard.pokemonId);
+        const flavorText = getFlavorText(pokemonData);
+        const $container = document.createElement('div');
+        const $cardFrontEditor = renderFrontSideEditor(currentCard);
+        const $cardBackEditor = renderBackSideEditor(currentCard, flavorText);
+        $container.className = 'row wrap';
+        $container.append($cardFrontEditor, $cardBackEditor);
+        $cardEditor.append($backRow, $container);
     }
-    $cardEditor.replaceChildren();
-    const studySet = data.viewingStudySet;
-    if (!studySet) {
-      throw new Error('Cannot edit card if not viewing set');
+    catch (error) {
+        console.log(error);
     }
-    const currentCard = studySet.cards.find((card) => card.cardId === cardId);
-    if (!currentCard) {
-      throw new Error('card id does not match any cards in study set');
-    }
-    data.editingCard = currentCard;
-    viewSwap('specific-card');
-    const $backRow = renderBackRow(studySet.setName, () => {
-      data.editingCard = null;
-      if (!data.viewingStudySet) {
-        throw new Error('cannot view non existent study set');
-      }
-      viewStudySet(data.viewingStudySet);
-    });
-    const pokemonData = await getPokemonSpecies(currentCard.pokemonId);
-    const flavorText = getFlavorText(pokemonData);
-    const $container = document.createElement('div');
-    const $cardFrontEditor = renderFrontSideEditor(currentCard);
-    const $cardBackEditor = renderBackSideEditor(currentCard, flavorText);
-    $container.className = 'row wrap';
-    $container.append($cardFrontEditor, $cardBackEditor);
-    $cardEditor.append($backRow, $container);
-  } catch (error) {
-    console.log(error);
-  }
 }
 function getFlavorText(pokemonData) {
-  const flavorTextEntries = pokemonData.flavor_text_entries;
-  const englishEntries = flavorTextEntries.filter(
-    (entry) => entry.language.name === 'en',
-  );
-  const textArray = extractProperty(englishEntries, 'flavor_text');
-  const textArrayUnique = removeDuplicates(textArray);
-  return textArrayUnique;
+    const flavorTextEntries = pokemonData.flavor_text_entries;
+    const englishEntries = flavorTextEntries.filter((entry) => entry.language.name === 'en');
+    const textArray = extractProperty(englishEntries, 'flavor_text');
+    const textArrayUnique = removeDuplicates(textArray);
+    return textArrayUnique;
 }
 function extractProperty(objectArray, property) {
-  return objectArray.map((object) => {
-    if (!(property in object)) {
-      throw new Error(
-        `${String(property)} is not a property of ${JSON.stringify(object)}`,
-      );
-    }
-    return object[property];
-  });
+    return objectArray.map((object) => {
+        if (!(property in object)) {
+            throw new Error(`${String(property)} is not a property of ${JSON.stringify(object)}`);
+        }
+        return object[property];
+    });
 }
 function removeDuplicates(array) {
-  return [...new Set(array)];
+    return [...new Set(array)];
 }
 async function getPokemonSpecies(idOrName) {
-  const url = `https://pokeapi.co/api/v2/pokemon-species/${idOrName}/`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`HTTP Error! Status: ${response.status}`);
-  }
-  const pokemonSpecies = await response.json();
-  return pokemonSpecies;
+    const url = `https://pokeapi.co/api/v2/pokemon-species/${idOrName}/`;
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+    }
+    const pokemonSpecies = (await response.json());
+    return pokemonSpecies;
 }
 function renderBackSideEditor(card, text) {
-  const { infoType, info } = card;
-  if (infoType === 'flavor_text') {
-    throw new Error(
-      'Shelly you need to come fix the renderBackSideEditor function to adapt to info types other than flavor_text!',
-    );
-  }
-  if (!info.textArray || !info.index) {
-    throw new Error(
-      'if the info type is flavor text there must be a text array and index',
-    );
-  }
-  const $backSideEditor = document.createElement('div');
-  const $infoTypeHolder = document.createElement('div');
-  const $infoLabel = document.createElement('h2');
-  const $infoSelector = document.createElement('select');
-  const $infoMessage = document.createElement('p');
-  const $option1 = document.createElement('option');
-  $backSideEditor.className = 'horz-padding row dir-column';
-  $infoTypeHolder.className = 'row dir-column';
-  $infoLabel.textContent = 'Info';
-  $infoLabel.setAttribute('for', 'info-type');
-  $infoSelector.className = 'col-full gray-text dropdown';
-  $infoSelector.setAttribute('id', 'info-type');
-  $option1.textContent = 'Pokedex Entry';
-  $option1.setAttribute('value', 'flavor_text');
-  $infoMessage.textContent =
-    'The information you want to associate with the pokemon';
-  $infoMessage.className = 'gray-text';
-  const $cardHolder = document.createElement('div');
-  const $card = renderTextSideOfCard(info.textArray[info.index]);
-  const $leftButton = document.createElement('button');
-  const $rightButton = document.createElement('button');
-  const $leftIcon = document.createElement('i');
-  const $rightIcon = document.createElement('i');
-  $cardHolder.className = 'row justify-center align-center';
-  $leftButton.className = 'icon-button';
-  $rightButton.className = 'icon-button';
-  $leftIcon.className = 'fa-solid fa-chevron-left';
-  $rightIcon.className = 'fa-solid fa-chevron-right';
-  $leftButton.addEventListener('click', () => {
-    console.log(text);
-    console.log('click left');
-  });
-  $rightButton.addEventListener('click', () => {
-    console.log('click right');
-  });
-  $infoSelector.append($option1);
-  $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
-  $leftButton.append($leftIcon);
-  $rightButton.append($rightIcon);
-  $cardHolder.append($leftButton, $card, $rightButton);
-  $backSideEditor.append($infoTypeHolder, $cardHolder);
-  return $backSideEditor;
+    const { infoType, info } = card;
+    const { textArray, index } = info;
+    if (infoType !== 'flavor_text') {
+        throw new Error('Shelly you need to come fix the renderBackSideEditor function to adapt to info types other than flavor_text!');
+    }
+    if (!textArray || index === undefined) {
+        throw new Error('if the info type is flavor text there must be a text array and index');
+    }
+    const $backSideEditor = document.createElement('div');
+    const $infoTypeHolder = document.createElement('div');
+    const $infoLabel = document.createElement('h2');
+    const $infoSelector = document.createElement('select');
+    const $infoMessage = document.createElement('p');
+    const $option1 = document.createElement('option');
+    $backSideEditor.className = 'horz-padding row dir-column';
+    $infoTypeHolder.className = 'row dir-column';
+    $infoLabel.textContent = 'Info';
+    $infoLabel.setAttribute('for', 'info-type');
+    $infoSelector.className = 'col-full gray-text dropdown';
+    $infoSelector.setAttribute('id', 'info-type');
+    $option1.textContent = 'Pokedex Entry';
+    $option1.setAttribute('value', 'flavor_text');
+    $infoMessage.textContent =
+        'The information you want to associate with the pokemon';
+    $infoMessage.className = 'gray-text';
+    const $cardHolder = document.createElement('div');
+    const $card = renderTextSideOfCard(textArray[index]);
+    const $leftButton = document.createElement('button');
+    const $rightButton = document.createElement('button');
+    const $leftIcon = document.createElement('i');
+    const $rightIcon = document.createElement('i');
+    $cardHolder.className = 'row justify-center align-center';
+    $leftButton.className = 'icon-button';
+    $rightButton.className = 'icon-button';
+    $leftIcon.className = 'fa-solid fa-chevron-left';
+    $rightIcon.className = 'fa-solid fa-chevron-right';
+    $leftButton.addEventListener('click', () => {
+        console.log('click left');
+        if (index === undefined) {
+            throw new Error('there must an index if the info type is flavor text');
+        }
+        switchOutText(-1);
+    });
+    $rightButton.addEventListener('click', () => {
+        console.log('click right');
+        if (index === undefined) {
+            throw new Error('there must an index if the info type is flavor text');
+        }
+        switchOutText(1);
+    });
+    $infoSelector.append($option1);
+    $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
+    $leftButton.append($leftIcon);
+    $rightButton.append($rightIcon);
+    $cardHolder.append($leftButton, $card, $rightButton);
+    $backSideEditor.append($infoTypeHolder, $cardHolder);
+    return $backSideEditor;
+}
+function switchOutText(direction) {
+    const card = data.editingCard;
+    if (!card) {
+        throw new Error('cannot switch out text of card that is not currently displayed');
+    }
+    if (card.info.index === undefined) {
+        throw new Error('cannot switch out text of card that does not have an index');
+    }
+    card.info.index += direction;
+    if (card.info.index < 0) {
+        card.info.index = card.info.textArray?.length - 1;
+    }
+    else if (card.info.index > card.info.textArray?.length - 1) {
+        card.info.index = 0;
+    }
+    writeData();
 }
 function renderFrontSideEditor(card) {
-  const $cardFrontEditor = document.createElement('div');
-  const $titleRow = document.createElement('div');
-  const $pokemonLabel = document.createElement('h2');
-  const $pokemonName = document.createElement('p');
-  const $changePokemonButton = document.createElement('button');
-  const $pencilIcon = document.createElement('i');
-  const $card = renderPokemonSideOfCard(card.pokemonName, card.pokemonImg);
-  $cardFrontEditor.className = 'row dir-column horz-padding align-center';
-  $titleRow.className = 'row align-center col-full justify-center';
-  $pokemonLabel.textContent = 'Pokemon:';
-  $pokemonName.textContent = capitalizeWord(card.pokemonName);
-  $pokemonName.className = 'pokemon-name-editing';
-  $changePokemonButton.className = 'icon-button gray-text sm-icon';
-  $changePokemonButton.textContent = 'Change Pokemon';
-  $pencilIcon.className = 'fa-solid fa-pencil';
-  $changePokemonButton.prepend($pencilIcon);
-  $titleRow.append($pokemonLabel, $pokemonName);
-  $cardFrontEditor.append($titleRow, $changePokemonButton, $card);
-  return $cardFrontEditor;
+    const $cardFrontEditor = document.createElement('div');
+    const $titleRow = document.createElement('div');
+    const $pokemonLabel = document.createElement('h2');
+    const $pokemonName = document.createElement('p');
+    const $changePokemonButton = document.createElement('button');
+    const $pencilIcon = document.createElement('i');
+    const $card = renderPokemonSideOfCard(card.pokemonName, card.pokemonImg);
+    $cardFrontEditor.className = 'row dir-column horz-padding align-center';
+    $titleRow.className = 'row align-center col-full justify-center';
+    $pokemonLabel.textContent = 'Pokemon:';
+    $pokemonName.textContent = capitalizeWord(card.pokemonName);
+    $pokemonName.className = 'pokemon-name-editing';
+    $changePokemonButton.className = 'icon-button gray-text sm-icon';
+    $changePokemonButton.textContent = 'Change Pokemon';
+    $pencilIcon.className = 'fa-solid fa-pencil';
+    $changePokemonButton.prepend($pencilIcon);
+    $titleRow.append($pokemonLabel, $pokemonName);
+    $cardFrontEditor.append($titleRow, $changePokemonButton, $card);
+    return $cardFrontEditor;
 }
 function renderTextSideOfCard(text) {
-  const $card = document.createElement('div');
-  const $text = document.createElement('p');
-  $card.className = 'card';
-  $text.textContent = text;
-  $card.append($text);
-  return $card;
+    const $card = document.createElement('div');
+    const $text = document.createElement('p');
+    $card.className = 'card';
+    $text.textContent = text;
+    $card.append($text);
+    return $card;
 }
 function renderPokemonSideOfCard(name, imageURL) {
-  const $card = document.createElement('div');
-  const $imageWrapper = document.createElement('div');
-  const $image = document.createElement('img');
-  const $name = document.createElement('h3');
-  $card.className = 'card';
-  $imageWrapper.className = 'card-image';
-  $image.setAttribute('src', imageURL);
-  $name.textContent = capitalizeWord(name);
-  $imageWrapper.append($image);
-  $card.append($imageWrapper, $name);
-  return $card;
+    const $card = document.createElement('div');
+    const $imageWrapper = document.createElement('div');
+    const $image = document.createElement('img');
+    const $name = document.createElement('h3');
+    $card.className = 'card';
+    $imageWrapper.className = 'card-image';
+    $image.setAttribute('src', imageURL);
+    $name.textContent = capitalizeWord(name);
+    $imageWrapper.append($image);
+    $card.append($imageWrapper, $name);
+    return $card;
 }
 function renderTitleRow(title) {
-  const $titleRow = document.createElement('div');
-  const $title = document.createElement('h2');
-  const $changeTitleButton = document.createElement('button');
-  const $pencilIcon = document.createElement('i');
-  $title.textContent = title;
-  $changeTitleButton.textContent = 'Change Title';
-  $changeTitleButton.className = 'icon-button gray-text change-title';
-  $pencilIcon.className = 'fa-solid fa-pencil';
-  $titleRow.className = 'row space-between align-center horz-padding';
-  $changeTitleButton.prepend($pencilIcon);
-  $titleRow.append($title, $changeTitleButton);
-  return $titleRow;
+    const $titleRow = document.createElement('div');
+    const $title = document.createElement('h2');
+    const $changeTitleButton = document.createElement('button');
+    const $pencilIcon = document.createElement('i');
+    $title.textContent = title;
+    $changeTitleButton.textContent = 'Change Title';
+    $changeTitleButton.className = 'icon-button gray-text change-title';
+    $pencilIcon.className = 'fa-solid fa-pencil';
+    $titleRow.className = 'row space-between align-center horz-padding';
+    $changeTitleButton.prepend($pencilIcon);
+    $titleRow.append($title, $changeTitleButton);
+    return $titleRow;
 }
 function handleMenuInteraction(event) {
-  const $eventTarget = event.target;
-  let $tab;
-  if ($eventTarget.matches('.tab')) {
-    $tab = $eventTarget;
-  } else {
-    $tab = $eventTarget.closest('.tab');
-  }
-  if (!$tab) return;
-  const view = $tab.getAttribute('data-view');
-  if (!view) throw new Error('$tab does not have an associated view');
-  viewSwap(view);
-  closeMenu();
+    const $eventTarget = event.target;
+    let $tab;
+    if ($eventTarget.matches('.tab')) {
+        $tab = $eventTarget;
+    }
+    else {
+        $tab = $eventTarget.closest('.tab');
+    }
+    if (!$tab)
+        return;
+    const view = $tab.getAttribute('data-view');
+    if (!view)
+        throw new Error('$tab does not have an associated view');
+    viewSwap(view);
+    closeMenu();
 }
 function viewSwap(view, $array = $views) {
-  $array.forEach(($view) => {
-    if ($view.matches(`[data-view="${view}"]`)) {
-      $view.className = 'view';
-    } else {
-      $view.className = 'view hidden';
-    }
-  });
-  data.currentView = view;
-  writeData();
+    $array.forEach(($view) => {
+        if ($view.matches(`[data-view="${view}"]`)) {
+            $view.className = 'view';
+        }
+        else {
+            $view.className = 'view hidden';
+        }
+    });
+    data.currentView = view;
+    writeData();
 }
 function openMenu() {
-  if (!$menu) throw new Error('$menu does not exist');
-  $menu.className = 'menu row dir-column';
+    if (!$menu)
+        throw new Error('$menu does not exist');
+    $menu.className = 'menu row dir-column';
 }
 function closeMenu() {
-  if (!$menu) throw new Error('$menu does not exist');
-  $menu.className = 'menu row dir-column hidden';
+    if (!$menu)
+        throw new Error('$menu does not exist');
+    $menu.className = 'menu row dir-column hidden';
 }
 function capitalizeWord(word) {
-  return word[0].toUpperCase() + word.slice(1);
+    return word[0].toUpperCase() + word.slice(1);
 }
 // function capitalizeAllWords(words: string): string {
 //   const individualWords = words.split(' ');

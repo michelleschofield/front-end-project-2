@@ -232,12 +232,63 @@ function openCardEditor(cardId: number): void {
 
   const $container = document.createElement('div');
   const $cardFrontEditor = renderFrontSideEditor(currentCard);
-  const $cardBackEditor = document.createElement('div');
+  const $cardBackEditor = renderBackSideEditor(currentCard);
 
   $container.className = 'row wrap';
 
   $container.append($cardFrontEditor, $cardBackEditor);
   $cardEditor.append($backRow, $container);
+}
+
+function renderBackSideEditor(card: Card): HTMLDivElement {
+  const $backSideEditor = document.createElement('div');
+
+  const $infoTypeHolder = document.createElement('div');
+  const $infoLabel = document.createElement('h2');
+  const $infoSelector = document.createElement('select');
+  const $infoMessage = document.createElement('p');
+  const $option1 = document.createElement('option');
+
+  $backSideEditor.className = 'horz-padding row dir-column';
+
+  $infoTypeHolder.className = 'row dir-column';
+
+  $infoLabel.textContent = 'Info';
+  $infoLabel.setAttribute('for', 'info-type');
+
+  $infoSelector.className = 'col-full gray-text dropdown';
+  $infoSelector.setAttribute('id', 'info-type');
+
+  $option1.textContent = 'Pokedex Entry';
+  $option1.setAttribute('value', 'flavor_text');
+
+  $infoMessage.textContent =
+    'The information you want to associate with the pokemon';
+  $infoMessage.className = 'gray-text';
+
+  const $cardHolder = document.createElement('div');
+  const $card = renderTextSideOfCard(card.info);
+  const $leftButton = document.createElement('button');
+  const $rightButton = document.createElement('button');
+  const $leftIcon = document.createElement('i');
+  const $rightIcon = document.createElement('i');
+
+  $cardHolder.className = 'row justify-center align-center';
+
+  $leftButton.className = 'icon-button';
+  $rightButton.className = 'icon-button';
+
+  $leftIcon.className = 'fa-solid fa-chevron-left';
+  $rightIcon.className = 'fa-solid fa-chevron-right';
+
+  $infoSelector.append($option1);
+  $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
+  $leftButton.append($leftIcon);
+  $rightButton.append($rightIcon);
+  $cardHolder.append($leftButton, $card, $rightButton);
+  $backSideEditor.append($infoTypeHolder, $cardHolder);
+
+  return $backSideEditor;
 }
 
 function renderFrontSideEditor(card: Card): HTMLDivElement {

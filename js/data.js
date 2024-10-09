@@ -21,7 +21,7 @@ function readData() {
             {
               pokemonName: 'bulbasaur',
               pokemonId: 1,
-              infoType: 'text',
+              infoType: 'flavor_text',
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
@@ -30,7 +30,7 @@ function readData() {
             {
               pokemonName: 'bulbasaur',
               pokemonId: 1,
-              infoType: 'text',
+              infoType: 'flavor_text',
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
@@ -39,7 +39,7 @@ function readData() {
             {
               pokemonName: 'bulbasaur',
               pokemonId: 1,
-              infoType: 'text',
+              infoType: 'flavor_text',
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
@@ -48,7 +48,7 @@ function readData() {
             {
               pokemonName: 'bulbasaur',
               pokemonId: 1,
-              infoType: 'text',
+              infoType: 'flavor_text',
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',
@@ -64,7 +64,7 @@ function readData() {
             {
               pokemonName: 'bulby boy',
               pokemonId: 1,
-              infoType: 'text',
+              infoType: 'flavor_text',
               info: 'A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.',
               pokemonImg:
                 'https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/001.png',

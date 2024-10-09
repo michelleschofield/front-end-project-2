@@ -1,12 +1,13 @@
-const menuViews = [
-  'home',
-  'study sets',
-  'flashcards',
-  'quiz',
-  'match',
-  'memory',
-  'asteroids',
-];
+interface FlavorTextEntry {
+  flavor_text: string;
+  language: {
+    name: string;
+  };
+}
+
+interface PokemonSpecies {
+  flavor_text_entries: FlavorTextEntry[];
+}
 
 const $menu = document.querySelector('.menu') as HTMLDivElement;
 const $tabHolder = document.querySelector('.tabs') as HTMLDivElement;
@@ -46,8 +47,6 @@ $newSetButton.addEventListener('click', () => {
   viewStudySet(data.sets[0]);
 });
 $setsHolder.addEventListener('click', handleSetsClick);
-
-buildMenu();
 
 function handleSetsClick(event: Event): void {
   const $eventTarget = event.target as HTMLElement;
@@ -205,39 +204,93 @@ function renderBackRow(
   return $row;
 }
 
-function openCardEditor(cardId: number): void {
-  if (!$cardEditor) throw new Error('$cardEditor does not exist');
-  $cardEditor.replaceChildren();
+async function openCardEditor(cardId: number): Promise<void> {
+  try {
+    if (!$cardEditor) throw new Error('$cardEditor does not exist');
+    $cardEditor.replaceChildren();
 
-  const studySet = data.viewingStudySet;
-  if (!studySet) throw new Error('Cannot edit card if not viewing set');
+    const studySet = data.viewingStudySet;
+    if (!studySet) throw new Error('Cannot edit card if not viewing set');
 
-  const currentCard = studySet.cards.find((card) => card.cardId === cardId);
-  if (!currentCard) {
-    throw new Error('card id does not match any cards in study set');
+    const currentCard = studySet.cards.find((card) => card.cardId === cardId);
+    if (!currentCard) {
+      throw new Error('card id does not match any cards in study set');
+    }
+
+    data.editingCard = currentCard;
+    viewSwap('specific-card');
+
+    const $backRow = renderBackRow(studySet.setName, () => {
+      data.editingCard = null;
+
+      if (!data.viewingStudySet) {
+        throw new Error('cannot view non existent study set');
+      }
+      viewStudySet(data.viewingStudySet);
+    });
+
+    const flavorText = await getFlavorText(currentCard.pokemonId);
+    console.log(flavorText);
+
+    const $container = document.createElement('div');
+    const $cardFrontEditor = renderFrontSideEditor(currentCard);
+    const $cardBackEditor = renderBackSideEditor(currentCard);
+
+    $container.className = 'row wrap';
+
+    $container.append($cardFrontEditor, $cardBackEditor);
+    $cardEditor.append($backRow, $container);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function getFlavorText(pokemonId: number): Promise<string[]> {
+  const pokemonData = await getPokemonSpecies(pokemonId);
+
+  const flavorTextEntries = pokemonData.flavor_text_entries;
+  const englishEntries = flavorTextEntries.filter(
+    (entry) => entry.language.name === 'en',
+  );
+
+  const textArray = extractProperty(englishEntries, 'flavor_text');
+
+  const textArrayUnique = removeDuplicates(textArray);
+
+  return textArrayUnique as string[];
+}
+
+function extractProperty<T extends object, K extends keyof T>(
+  objectArray: T[],
+  property: K,
+): T[K][] {
+  return objectArray.map((object) => {
+    if (!(property in object)) {
+      throw new Error(
+        `${String(property)} is not a property of ${JSON.stringify(object)}`,
+      );
+    }
+    return object[property];
+  });
+}
+
+function removeDuplicates(array: unknown[]): unknown[] {
+  return [...new Set(array)];
+}
+
+async function getPokemonSpecies(
+  idOrName: number | string,
+): Promise<PokemonSpecies> {
+  const url = `https://pokeapi.co/api/v2/pokemon-species/${idOrName}/`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`HTTP Error! Status: ${response.status}`);
   }
 
-  data.editingCard = currentCard;
+  const pokemonSpecies = (await response.json()) as PokemonSpecies;
 
-  viewSwap('specific-card');
-
-  const $backRow = renderBackRow(studySet.setName, () => {
-    data.editingCard = null;
-
-    if (!data.viewingStudySet) {
-      throw new Error('cannot view non existent study set');
-    }
-    viewStudySet(data.viewingStudySet);
-  });
-
-  const $container = document.createElement('div');
-  const $cardFrontEditor = renderFrontSideEditor(currentCard);
-  const $cardBackEditor = renderBackSideEditor(currentCard);
-
-  $container.className = 'row wrap';
-
-  $container.append($cardFrontEditor, $cardBackEditor);
-  $cardEditor.append($backRow, $container);
+  return pokemonSpecies;
 }
 
 function renderBackSideEditor(card: Card): HTMLDivElement {
@@ -417,27 +470,12 @@ function closeMenu(): void {
   $menu.className = 'menu row dir-column hidden';
 }
 
-function buildMenu(): void {
-  menuViews.forEach((menuView) => {
-    const $tab = document.createElement('div');
-    const $text = document.createElement('h2');
-
-    $text.textContent = capitalizeAllWords(menuView);
-    $tab.className = 'tab';
-    $tab.setAttribute('data-view', menuView);
-
-    $tab.appendChild($text);
-
-    $tabHolder?.appendChild($tab);
-  });
-}
-
 function capitalizeWord(word: string): string {
   return word[0].toUpperCase() + word.slice(1);
 }
 
-function capitalizeAllWords(words: string): string {
-  const individualWords = words.split(' ');
-  const capitalizedWords = individualWords.map((word) => capitalizeWord(word));
-  return capitalizedWords.join(' ');
-}
+// function capitalizeAllWords(words: string): string {
+//   const individualWords = words.split(' ');
+//   const capitalizedWords = individualWords.map((word) => capitalizeWord(word));
+//   return capitalizedWords.join(' ');
+// }

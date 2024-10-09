@@ -147,7 +147,8 @@ header {
 
 .pokemon-name-editing {
   font-size: x-large;
-  padding: 0.5rem;
+  padding: 0 0.5rem;
+  margin: 0;
 }
 
 .dropdown {

@@ -97,14 +97,27 @@ function viewStudySet(studySet) {
   });
 }
 function renderBothSidesOfCard(card) {
-  const { pokemonName, pokemonImg, info, cardId } = card;
+  const { pokemonName, pokemonImg, infoType, info, cardId } = card;
   const $holder = document.createElement('div');
   $holder.className = 'row horz-padding';
   const $frontSide = renderPokemonSideOfCard(
     capitalizeWord(pokemonName),
     pokemonImg,
   );
-  const $backSide = renderTextSideOfCard(info);
+  let $backSide;
+  if (infoType === 'flavor_text') {
+    if (!info.textArray || !info.index) {
+      throw new Error(
+        'if the info type is flavor text there must be a text array and index',
+      );
+    }
+    $backSide = renderTextSideOfCard(info.textArray[info.index]);
+  }
+  if (!$backSide) {
+    throw new Error(
+      'Shelly you need to come fix the renderBothSidesOfCard function to adapt to info types other than flavor_text!',
+    );
+  }
   const $buttons = renderTrashAndEdit(cardId);
   $holder.append($frontSide, $backSide, $buttons);
   return $holder;
@@ -152,10 +165,14 @@ function renderBackRow(text, buttonCallback) {
 }
 async function openCardEditor(cardId) {
   try {
-    if (!$cardEditor) throw new Error('$cardEditor does not exist');
+    if (!$cardEditor) {
+      throw new Error('$cardEditor does not exist');
+    }
     $cardEditor.replaceChildren();
     const studySet = data.viewingStudySet;
-    if (!studySet) throw new Error('Cannot edit card if not viewing set');
+    if (!studySet) {
+      throw new Error('Cannot edit card if not viewing set');
+    }
     const currentCard = studySet.cards.find((card) => card.cardId === cardId);
     if (!currentCard) {
       throw new Error('card id does not match any cards in study set');
@@ -169,11 +186,11 @@ async function openCardEditor(cardId) {
       }
       viewStudySet(data.viewingStudySet);
     });
-    const flavorText = await getFlavorText(currentCard.pokemonId);
-    console.log(flavorText);
+    const pokemonData = await getPokemonSpecies(currentCard.pokemonId);
+    const flavorText = getFlavorText(pokemonData);
     const $container = document.createElement('div');
     const $cardFrontEditor = renderFrontSideEditor(currentCard);
-    const $cardBackEditor = renderBackSideEditor(currentCard);
+    const $cardBackEditor = renderBackSideEditor(currentCard, flavorText);
     $container.className = 'row wrap';
     $container.append($cardFrontEditor, $cardBackEditor);
     $cardEditor.append($backRow, $container);
@@ -181,10 +198,9 @@ async function openCardEditor(cardId) {
     console.log(error);
   }
 }
-async function getFlavorText(pokemonId) {
-  const pokemonData = await getPokemonSpecies(pokemonId);
-  const flavor_text_entries = pokemonData.flavor_text_entries;
-  const englishEntries = flavor_text_entries.filter(
+function getFlavorText(pokemonData) {
+  const flavorTextEntries = pokemonData.flavor_text_entries;
+  const englishEntries = flavorTextEntries.filter(
     (entry) => entry.language.name === 'en',
   );
   const textArray = extractProperty(englishEntries, 'flavor_text');
@@ -213,7 +229,18 @@ async function getPokemonSpecies(idOrName) {
   const pokemonSpecies = await response.json();
   return pokemonSpecies;
 }
-function renderBackSideEditor(card) {
+function renderBackSideEditor(card, text) {
+  const { infoType, info } = card;
+  if (infoType === 'flavor_text') {
+    throw new Error(
+      'Shelly you need to come fix the renderBackSideEditor function to adapt to info types other than flavor_text!',
+    );
+  }
+  if (!info.textArray || !info.index) {
+    throw new Error(
+      'if the info type is flavor text there must be a text array and index',
+    );
+  }
   const $backSideEditor = document.createElement('div');
   const $infoTypeHolder = document.createElement('div');
   const $infoLabel = document.createElement('h2');
@@ -232,7 +259,7 @@ function renderBackSideEditor(card) {
     'The information you want to associate with the pokemon';
   $infoMessage.className = 'gray-text';
   const $cardHolder = document.createElement('div');
-  const $card = renderTextSideOfCard(card.info);
+  const $card = renderTextSideOfCard(info.textArray[info.index]);
   const $leftButton = document.createElement('button');
   const $rightButton = document.createElement('button');
   const $leftIcon = document.createElement('i');
@@ -242,6 +269,13 @@ function renderBackSideEditor(card) {
   $rightButton.className = 'icon-button';
   $leftIcon.className = 'fa-solid fa-chevron-left';
   $rightIcon.className = 'fa-solid fa-chevron-right';
+  $leftButton.addEventListener('click', () => {
+    console.log(text);
+    console.log('click left');
+  });
+  $rightButton.addEventListener('click', () => {
+    console.log('click right');
+  });
   $infoSelector.append($option1);
   $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
   $leftButton.append($leftIcon);
@@ -268,7 +302,7 @@ function renderFrontSideEditor(card) {
   $pencilIcon.className = 'fa-solid fa-pencil';
   $changePokemonButton.prepend($pencilIcon);
   $titleRow.append($pokemonLabel, $pokemonName);
-  $cardFrontEditor.append($titleRow, $card, $changePokemonButton);
+  $cardFrontEditor.append($titleRow, $changePokemonButton, $card);
   return $cardFrontEditor;
 }
 function renderTextSideOfCard(text) {
@@ -342,8 +376,8 @@ function closeMenu() {
 function capitalizeWord(word) {
   return word[0].toUpperCase() + word.slice(1);
 }
-function capitalizeAllWords(words) {
-  const individualWords = words.split(' ');
-  const capitalizedWords = individualWords.map((word) => capitalizeWord(word));
-  return capitalizedWords.join(' ');
-}
+// function capitalizeAllWords(words: string): string {
+//   const individualWords = words.split(' ');
+//   const capitalizedWords = individualWords.map((word) => capitalizeWord(word));
+//   return capitalizedWords.join(' ');
+// }

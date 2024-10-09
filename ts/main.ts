@@ -132,7 +132,7 @@ function viewStudySet(studySet: StudySet): void {
 }
 
 function renderBothSidesOfCard(card: Card): HTMLDivElement {
-  const { pokemonName, pokemonImg, info, cardId } = card;
+  const { pokemonName, pokemonImg, infoType, info, cardId } = card;
 
   const $holder = document.createElement('div');
   $holder.className = 'row horz-padding';
@@ -141,7 +141,24 @@ function renderBothSidesOfCard(card: Card): HTMLDivElement {
     capitalizeWord(pokemonName),
     pokemonImg,
   );
-  const $backSide = renderTextSideOfCard(info);
+
+  let $backSide;
+
+  if (infoType === 'flavor_text') {
+    if (!info.textArray || !info.index) {
+      throw new Error(
+        'if the info type is flavor text there must be a text array and index',
+      );
+    }
+    $backSide = renderTextSideOfCard(info.textArray[info.index]);
+  }
+
+  if (!$backSide) {
+    throw new Error(
+      'Shelly you need to come fix the renderBothSidesOfCard function to adapt to info types other than flavor_text!',
+    );
+  }
+
   const $buttons = renderTrashAndEdit(cardId);
 
   $holder.append($frontSide, $backSide, $buttons);
@@ -206,13 +223,19 @@ function renderBackRow(
 
 async function openCardEditor(cardId: number): Promise<void> {
   try {
-    if (!$cardEditor) throw new Error('$cardEditor does not exist');
+    if (!$cardEditor) {
+      throw new Error('$cardEditor does not exist');
+    }
     $cardEditor.replaceChildren();
 
     const studySet = data.viewingStudySet;
-    if (!studySet) throw new Error('Cannot edit card if not viewing set');
+
+    if (!studySet) {
+      throw new Error('Cannot edit card if not viewing set');
+    }
 
     const currentCard = studySet.cards.find((card) => card.cardId === cardId);
+
     if (!currentCard) {
       throw new Error('card id does not match any cards in study set');
     }
@@ -229,12 +252,13 @@ async function openCardEditor(cardId: number): Promise<void> {
       viewStudySet(data.viewingStudySet);
     });
 
-    const flavorText = await getFlavorText(currentCard.pokemonId);
-    console.log(flavorText);
+    const pokemonData = await getPokemonSpecies(currentCard.pokemonId);
+
+    const flavorText = getFlavorText(pokemonData);
 
     const $container = document.createElement('div');
     const $cardFrontEditor = renderFrontSideEditor(currentCard);
-    const $cardBackEditor = renderBackSideEditor(currentCard);
+    const $cardBackEditor = renderBackSideEditor(currentCard, flavorText);
 
     $container.className = 'row wrap';
 
@@ -245,9 +269,7 @@ async function openCardEditor(cardId: number): Promise<void> {
   }
 }
 
-async function getFlavorText(pokemonId: number): Promise<string[]> {
-  const pokemonData = await getPokemonSpecies(pokemonId);
-
+function getFlavorText(pokemonData: PokemonSpecies): string[] {
   const flavorTextEntries = pokemonData.flavor_text_entries;
   const englishEntries = flavorTextEntries.filter(
     (entry) => entry.language.name === 'en',
@@ -293,7 +315,21 @@ async function getPokemonSpecies(
   return pokemonSpecies;
 }
 
-function renderBackSideEditor(card: Card): HTMLDivElement {
+function renderBackSideEditor(card: Card, text: string[]): HTMLDivElement {
+  const { infoType, info } = card;
+
+  if (infoType === 'flavor_text') {
+    throw new Error(
+      'Shelly you need to come fix the renderBackSideEditor function to adapt to info types other than flavor_text!',
+    );
+  }
+
+  if (!info.textArray || !info.index) {
+    throw new Error(
+      'if the info type is flavor text there must be a text array and index',
+    );
+  }
+
   const $backSideEditor = document.createElement('div');
 
   const $infoTypeHolder = document.createElement('div');
@@ -320,7 +356,7 @@ function renderBackSideEditor(card: Card): HTMLDivElement {
   $infoMessage.className = 'gray-text';
 
   const $cardHolder = document.createElement('div');
-  const $card = renderTextSideOfCard(card.info);
+  const $card = renderTextSideOfCard(info.textArray[info.index]);
   const $leftButton = document.createElement('button');
   const $rightButton = document.createElement('button');
   const $leftIcon = document.createElement('i');
@@ -333,6 +369,14 @@ function renderBackSideEditor(card: Card): HTMLDivElement {
 
   $leftIcon.className = 'fa-solid fa-chevron-left';
   $rightIcon.className = 'fa-solid fa-chevron-right';
+
+  $leftButton.addEventListener('click', () => {
+    console.log(text);
+    console.log('click left');
+  });
+  $rightButton.addEventListener('click', () => {
+    console.log('click right');
+  });
 
   $infoSelector.append($option1);
   $infoTypeHolder.append($infoLabel, $infoSelector, $infoMessage);
@@ -368,7 +412,7 @@ function renderFrontSideEditor(card: Card): HTMLDivElement {
 
   $changePokemonButton.prepend($pencilIcon);
   $titleRow.append($pokemonLabel, $pokemonName);
-  $cardFrontEditor.append($titleRow, $card, $changePokemonButton);
+  $cardFrontEditor.append($titleRow, $changePokemonButton, $card);
 
   return $cardFrontEditor;
 }

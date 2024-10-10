@@ -10,19 +10,21 @@ interface PokemonSpecies {
 }
 
 const $menu = document.querySelector('.menu') as HTMLDivElement;
-const $tabHolder = document.querySelector('.tabs') as HTMLDivElement;
 const $closeMenuButton = document.querySelector(
   '.close-menu',
 ) as HTMLButtonElement;
-const $openMenuButton = document.querySelector('.open-menu');
+const $openMenuButton = document.querySelector(
+  '.open-menu',
+) as HTMLButtonElement;
 const $views = document.querySelectorAll('.view');
-const $newSetButton = document.querySelector('#new-set');
-const $setsHolder = document.querySelector('#sets-holder');
-const $viewingSet = document.querySelector('#viewing-set');
-const $cardEditor = document.querySelector('[data-view="specific-card"]');
+const $newSetButton = document.querySelector('#new-set') as HTMLButtonElement;
+const $setsHolder = document.querySelector('#sets-holder') as HTMLDivElement;
+const $viewingSet = document.querySelector('#viewing-set') as HTMLDivElement;
+const $cardEditor = document.querySelector(
+  '[data-view="specific-card"]',
+) as HTMLDivElement;
 
 if (!$menu) throw new Error('$menu query failed');
-if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
 if (!$openMenuButton) throw new Error('$openMenuButton query failed');
 if (!$newSetButton) throw new Error('$newSetButton query failed');
@@ -41,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
-$tabHolder.addEventListener('click', handleMenuInteraction);
+$menu.addEventListener('click', handleMenuInteraction);
 $newSetButton.addEventListener('click', () => {
   createNewSet();
 });
@@ -81,9 +83,6 @@ function handleSetsClick(event: Event): void {
 }
 
 function setUpSets(): void {
-  if (!$setsHolder) {
-    throw new Error('$setsHolder does not exist');
-  }
   $setsHolder.replaceChildren();
 
   const sets = data.sets;
@@ -116,8 +115,6 @@ function renderSetName(studySet: StudySet): HTMLDivElement {
 }
 
 function showNoSets(): void {
-  if (!$setsHolder) throw new Error('$setsHolder does not exist');
-
   const $noSetsText = document.createElement('h3');
   $noSetsText.textContent =
     "It appears you don't have any sets, you can make your first one above";
@@ -127,15 +124,13 @@ function showNoSets(): void {
 }
 
 function viewStudySet(studySet: StudySet): void {
-  if (!$viewingSet) throw new Error('$viewingSet does not exist');
-
   const { setName, cards } = studySet;
   data.viewingStudySet = studySet;
   viewSwap('specific-set');
   $viewingSet.replaceChildren();
 
   const $backRow = renderBackRow('All Sets', exitStudySet);
-  const $titleRow = renderChangingTitleRow(setName);
+  const $titleRow = renderTitleRow(setName);
   const $cardsContainer = document.createElement('div');
 
   $cardsContainer.className = 'row wrap';
@@ -253,9 +248,6 @@ function renderBackRow(
 }
 
 function openCardEditor(cardId: number): void {
-  if (!$cardEditor) {
-    throw new Error('$cardEditor does not exist');
-  }
   $cardEditor.replaceChildren();
 
   const studySet = data.viewingStudySet;
@@ -519,6 +511,31 @@ function renderPokemonSideOfCard(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+function renderPokeballCard(): HTMLDivElement {
+  const $card = document.createElement('div');
+  const $redHalf = document.createElement('div');
+  const $midSection = document.createElement('div');
+  const $whiteHalf = document.createElement('div');
+
+  const $midStripe1 = document.createElement('div');
+  const $centerCircle = document.createElement('div');
+  const $midStripe2 = document.createElement('div');
+
+  $card.className = 'card pokeball';
+  $redHalf.className = 'red-half';
+  $midSection.className = 'mid-section';
+  $whiteHalf.className = 'white-half';
+
+  $midStripe1.className = 'mid-stripe';
+  $centerCircle.className = 'center-circle';
+  $midStripe2.className = 'mid-stripe';
+
+  $midSection.append($midStripe1, $centerCircle, $midStripe2);
+  $card.append($redHalf, $midSection, $whiteHalf);
+
+  return $card;
+}
+
 function renderTitleRow(title: string): HTMLDivElement {
   const $titleRow = document.createElement('div');
   const $title = document.createElement('h2');
@@ -536,7 +553,7 @@ function renderTitleRow(title: string): HTMLDivElement {
   $titleRow.append($title, $changeTitleButton);
 
   $changeTitleButton.addEventListener('click', () => {
-    changeTitle();
+    $titleRow.replaceWith(renderChangingTitleRow(title));
   });
 
   return $titleRow;
@@ -558,16 +575,9 @@ function renderChangingTitleRow(currentTitle: string): HTMLElement {
     event.preventDefault();
     $titleRow.replaceWith(renderTitleRow($title.value));
     saveChangedTitle($title.value);
-    console.log($title.value);
   });
 
-  $title.focus();
-
   return $titleRow;
-}
-
-function changeTitle(): void {
-  console.log('change title');
 }
 
 function saveChangedTitle(title: string): void {
@@ -611,14 +621,10 @@ function viewSwap(view: string, $array = $views): void {
 }
 
 function openMenu(): void {
-  if (!$menu) throw new Error('$menu does not exist');
-
   $menu.className = 'menu row dir-column';
 }
 
 function closeMenu(): void {
-  if (!$menu) throw new Error('$menu does not exist');
-
   $menu.className = 'menu row dir-column hidden';
 }
 

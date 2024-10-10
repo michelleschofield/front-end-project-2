@@ -1,6 +1,5 @@
 'use strict';
 const $menu = document.querySelector('.menu');
-const $tabHolder = document.querySelector('.tabs');
 const $closeMenuButton = document.querySelector('.close-menu');
 const $openMenuButton = document.querySelector('.open-menu');
 const $views = document.querySelectorAll('.view');
@@ -9,7 +8,6 @@ const $setsHolder = document.querySelector('#sets-holder');
 const $viewingSet = document.querySelector('#viewing-set');
 const $cardEditor = document.querySelector('[data-view="specific-card"]');
 if (!$menu) throw new Error('$menu query failed');
-if (!$tabHolder) throw new Error('$tabHolder query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
 if (!$openMenuButton) throw new Error('$openMenuButton query failed');
 if (!$newSetButton) throw new Error('$newSetButton query failed');
@@ -27,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 $closeMenuButton.addEventListener('click', closeMenu);
 $openMenuButton.addEventListener('click', openMenu);
-$tabHolder.addEventListener('click', handleMenuInteraction);
+$menu.addEventListener('click', handleMenuInteraction);
 $newSetButton.addEventListener('click', () => {
   createNewSet();
 });
@@ -57,9 +55,6 @@ function handleSetsClick(event) {
   viewStudySet(studySet);
 }
 function setUpSets() {
-  if (!$setsHolder) {
-    throw new Error('$setsHolder does not exist');
-  }
   $setsHolder.replaceChildren();
   const sets = data.sets;
   if (!sets.length) {
@@ -85,7 +80,6 @@ function renderSetName(studySet) {
   return $row;
 }
 function showNoSets() {
-  if (!$setsHolder) throw new Error('$setsHolder does not exist');
   const $noSetsText = document.createElement('h3');
   $noSetsText.textContent =
     "It appears you don't have any sets, you can make your first one above";
@@ -93,13 +87,12 @@ function showNoSets() {
   $setsHolder.appendChild($noSetsText);
 }
 function viewStudySet(studySet) {
-  if (!$viewingSet) throw new Error('$viewingSet does not exist');
   const { setName, cards } = studySet;
   data.viewingStudySet = studySet;
   viewSwap('specific-set');
   $viewingSet.replaceChildren();
   const $backRow = renderBackRow('All Sets', exitStudySet);
-  const $titleRow = renderChangingTitleRow(setName);
+  const $titleRow = renderTitleRow(setName);
   const $cardsContainer = document.createElement('div');
   $cardsContainer.className = 'row wrap';
   $viewingSet.append($backRow, $titleRow, $cardsContainer);
@@ -187,9 +180,6 @@ function renderBackRow(text, buttonCallback) {
   return $row;
 }
 function openCardEditor(cardId) {
-  if (!$cardEditor) {
-    throw new Error('$cardEditor does not exist');
-  }
   $cardEditor.replaceChildren();
   const studySet = data.viewingStudySet;
   if (!studySet) {
@@ -381,6 +371,25 @@ function renderPokemonSideOfCard(name, imageURL) {
   return $card;
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+function renderPokeballCard() {
+  const $card = document.createElement('div');
+  const $redHalf = document.createElement('div');
+  const $midSection = document.createElement('div');
+  const $whiteHalf = document.createElement('div');
+  const $midStripe1 = document.createElement('div');
+  const $centerCircle = document.createElement('div');
+  const $midStripe2 = document.createElement('div');
+  $card.className = 'card pokeball';
+  $redHalf.className = 'red-half';
+  $midSection.className = 'mid-section';
+  $whiteHalf.className = 'white-half';
+  $midStripe1.className = 'mid-stripe';
+  $centerCircle.className = 'center-circle';
+  $midStripe2.className = 'mid-stripe';
+  $midSection.append($midStripe1, $centerCircle, $midStripe2);
+  $card.append($redHalf, $midSection, $whiteHalf);
+  return $card;
+}
 function renderTitleRow(title) {
   const $titleRow = document.createElement('div');
   const $title = document.createElement('h2');
@@ -394,7 +403,7 @@ function renderTitleRow(title) {
   $changeTitleButton.prepend($pencilIcon);
   $titleRow.append($title, $changeTitleButton);
   $changeTitleButton.addEventListener('click', () => {
-    changeTitle();
+    $titleRow.replaceWith(renderChangingTitleRow(title));
   });
   return $titleRow;
 }
@@ -411,13 +420,8 @@ function renderChangingTitleRow(currentTitle) {
     event.preventDefault();
     $titleRow.replaceWith(renderTitleRow($title.value));
     saveChangedTitle($title.value);
-    console.log($title.value);
   });
-  $title.focus();
   return $titleRow;
-}
-function changeTitle() {
-  console.log('change title');
 }
 function saveChangedTitle(title) {
   if (data.viewingStudySet) {
@@ -451,11 +455,9 @@ function viewSwap(view, $array = $views) {
   writeData();
 }
 function openMenu() {
-  if (!$menu) throw new Error('$menu does not exist');
   $menu.className = 'menu row dir-column';
 }
 function closeMenu() {
-  if (!$menu) throw new Error('$menu does not exist');
   $menu.className = 'menu row dir-column hidden';
 }
 function capitalizeWord(word) {

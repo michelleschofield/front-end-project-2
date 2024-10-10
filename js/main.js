@@ -399,7 +399,7 @@ function renderTitleRow(title) {
   return $titleRow;
 }
 function renderChangingTitleRow(currentTitle) {
-  const $titleRow = document.createElement('div');
+  const $titleRow = document.createElement('form');
   const $title = document.createElement('input');
   const $changeTitleButton = document.createElement('button');
   $title.setAttribute('value', currentTitle);
@@ -407,16 +407,23 @@ function renderChangingTitleRow(currentTitle) {
   $changeTitleButton.className = 'icon-button gray-text change-title';
   $titleRow.className = 'row space-between align-center horz-padding';
   $titleRow.append($title, $changeTitleButton);
-  $changeTitleButton.addEventListener('click', () => {
-    saveChangedTitle();
+  $titleRow.addEventListener('submit', (event) => {
+    event.preventDefault();
+    $titleRow.replaceWith(renderTitleRow($title.value));
+    saveChangedTitle($title.value);
+    console.log($title.value);
   });
+  $title.focus();
   return $titleRow;
 }
 function changeTitle() {
   console.log('change title');
 }
-function saveChangedTitle() {
-  console.log('saved');
+function saveChangedTitle(title) {
+  if (data.viewingStudySet) {
+    data.viewingStudySet.setName = title;
+    writeData();
+  }
 }
 function handleMenuInteraction(event) {
   const $eventTarget = event.target;

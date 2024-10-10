@@ -542,8 +542,8 @@ function renderTitleRow(title: string): HTMLDivElement {
   return $titleRow;
 }
 
-function renderChangingTitleRow(currentTitle: string): HTMLDivElement {
-  const $titleRow = document.createElement('div');
+function renderChangingTitleRow(currentTitle: string): HTMLElement {
+  const $titleRow = document.createElement('form');
   const $title = document.createElement('input');
   const $changeTitleButton = document.createElement('button');
 
@@ -554,9 +554,14 @@ function renderChangingTitleRow(currentTitle: string): HTMLDivElement {
 
   $titleRow.append($title, $changeTitleButton);
 
-  $changeTitleButton.addEventListener('click', () => {
-    saveChangedTitle();
+  $titleRow.addEventListener('submit', (event: Event) => {
+    event.preventDefault();
+    $titleRow.replaceWith(renderTitleRow($title.value));
+    saveChangedTitle($title.value);
+    console.log($title.value);
   });
+
+  $title.focus();
 
   return $titleRow;
 }
@@ -565,8 +570,11 @@ function changeTitle(): void {
   console.log('change title');
 }
 
-function saveChangedTitle(): void {
-  console.log('saved');
+function saveChangedTitle(title: string): void {
+  if (data.viewingStudySet) {
+    data.viewingStudySet.setName = title;
+    writeData();
+  }
 }
 
 function handleMenuInteraction(event: Event): void {

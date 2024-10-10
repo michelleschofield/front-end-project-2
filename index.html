@@ -58,18 +58,35 @@
           id="sets-holder"
           class="row dir-column bg-light-gray to-bottom"></div>
       </div>
-      <div id="viewing-set" class="view hidden" data-view="specific-set">
-        <!-- <div class="card pokeball">
-            <div class="red-half"></div>
-            <div class="mid-section">
-              <div class="mid-stripe"></div>
-              <div class="center-circle"></div>
-              <div class="mid-stripe"></div>
-            </div>
-            <div class="white-half"></div>
-          </div> -->
-      </div>
+      <div id="viewing-set" class="view hidden" data-view="specific-set"></div>
       <div class="view hidden" data-view="specific-card"></div>
+      <div class="view hidden" data-view="select-pokemon">
+        <div class="row align-center bg-light-gray">
+          <button
+            id="back-to-card-editor"
+            class="icon-button sm-icon gray-text">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <h3 class="gray-text">Back</h3>
+        </div>
+        <div class="row horz-padding">
+          <form>
+            <div class="row dir-column">
+              <label class="x-large-text" for="selection-method"
+                >Search By</label
+              >
+              <select class="dropdown large-text">
+                <option>Name of Pokemon</option>
+                <option>Type</option>
+                <option>Color</option>
+                <option>Ability</option>
+                <option>Habitat</option>
+                <option>Generation</option>
+              </select>
+            </div>
+          </form>
+        </div>
+      </div>
       <div class="view hidden" data-view="flashcards">
         <h1>flashcards</h1>
       </div>

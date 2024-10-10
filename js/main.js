@@ -7,6 +7,8 @@ const $newSetButton = document.querySelector('#new-set');
 const $setsHolder = document.querySelector('#sets-holder');
 const $viewingSet = document.querySelector('#viewing-set');
 const $cardEditor = document.querySelector('[data-view="specific-card"]');
+const $pokemonSelector = document.querySelector('[data-view="select-pokemon"]');
+const $backToCardEditor = document.querySelector('#back-to-card-editor');
 if (!$menu) throw new Error('$menu query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
 if (!$openMenuButton) throw new Error('$openMenuButton query failed');
@@ -14,11 +16,13 @@ if (!$newSetButton) throw new Error('$newSetButton query failed');
 if (!$setsHolder) throw new Error('$setsHolder query failed');
 if (!$viewingSet) throw new Error('$viewingSet query failed');
 if (!$cardEditor) throw new Error('$cardEditor query failed');
+if (!$pokemonSelector) throw new Error('$pokemonSelector query failed');
+if (!$backToCardEditor) throw new Error('$backToCardEditor query failed');
 document.addEventListener('DOMContentLoaded', () => {
   viewSwap(data.currentView);
   setUpSets();
   if (data.editingCard) {
-    openCardEditor(data.editingCard.cardId);
+    openCardEditor(data.editingCard);
   } else if (data.viewingStudySet) {
     viewStudySet(data.viewingStudySet);
   }
@@ -30,6 +34,12 @@ $newSetButton.addEventListener('click', () => {
   createNewSet();
 });
 $setsHolder.addEventListener('click', handleSetsClick);
+$backToCardEditor.addEventListener('click', () => {
+  if (!data.editingCard) {
+    throw new Error('cannot go back to card editor when not editing a card');
+  }
+  openCardEditor(data.editingCard);
+});
 function createNewSet() {
   const setId = data.nextSetId;
   const studySet = {
@@ -102,12 +112,35 @@ function viewStudySet(studySet) {
     const renderedCard = renderBothSidesOfCard(card);
     $cardsContainer.append(renderedCard);
   });
+  $newCard.addEventListener('click', () => {
+    createNewCard();
+  });
+}
+function createNewCard() {
+  const currentStudySet = data.viewingStudySet;
+  if (!currentStudySet) {
+    throw new Error('cannot create card without viewing a study set');
+  }
+  const newCard = {
+    pokemonName: '',
+    pokemonId: 0,
+    infoType: 'flavor_text',
+    info: {
+      textArray: [],
+      index: 0,
+    },
+    pokemonImg: '',
+    cardId: currentStudySet.nextCardId,
+  };
+  currentStudySet.nextCardId++;
+  data.editingCard = newCard;
+  openCardEditor(newCard);
 }
 function renderNewCardDiv() {
   const $row = document.createElement('div');
   const $card = renderPokeballCard();
   const $newCardButton = document.createElement('button');
-  $row.className = 'row';
+  $row.className = 'row bg-light-gray';
   $newCardButton.className = 'icon-button sm-icon gray-text';
   $newCardButton.textContent = 'Make a new card';
   $row.append($card, $newCardButton);
@@ -118,8 +151,17 @@ function exitStudySet() {
   setUpSets();
   viewSwap('study sets');
 }
+function exitCardEditor() {
+  data.editingCard = null;
+  if (!data.viewingStudySet) {
+    throw new Error(
+      'You shouldnt have been in the card editor without a study set',
+    );
+  }
+  viewStudySet(data.viewingStudySet);
+}
 function renderBothSidesOfCard(card) {
-  const { pokemonName, pokemonImg, infoType, info, cardId } = card;
+  const { pokemonName, pokemonImg, infoType, info } = card;
   const $holder = document.createElement('div');
   $holder.className = 'row horz-padding';
   const $frontSide = renderPokemonSideOfCard(
@@ -140,24 +182,22 @@ function renderBothSidesOfCard(card) {
       'Shelly you need to come fix the renderBothSidesOfCard function to adapt to info types other than flavor_text!',
     );
   }
-  const $buttons = renderTrashAndEdit(cardId);
+  const $buttons = renderTrashAndEdit(card);
   $holder.append($frontSide, $backSide, $buttons);
   return $holder;
 }
-function renderTrashAndEdit(cardId) {
+function renderTrashAndEdit(card) {
   const $buttonHolder = document.createElement('div');
   const $editButton = document.createElement('button');
   const $trashButton = document.createElement('button');
   const $editIcon = document.createElement('i');
   const $trashIcon = document.createElement('i');
   $editButton.addEventListener('click', () => {
-    editButtonListener(cardId);
+    editButtonListener(card);
   });
   $trashButton.addEventListener('click', () => {
-    trashButtonListener(cardId);
+    trashButtonListener(card);
   });
-  $editButton.setAttribute('id', `${cardId}`);
-  $trashButton.setAttribute('id', `${cardId}`);
   $buttonHolder.className = 'row dir-column small-text justify-center';
   $editButton.className = 'icon-button gray-text';
   $trashButton.className = 'icon-button gray-text';
@@ -168,11 +208,11 @@ function renderTrashAndEdit(cardId) {
   $buttonHolder.append($editButton, $trashButton);
   return $buttonHolder;
 }
-function trashButtonListener(cardId) {
-  console.log('trash', cardId);
+function trashButtonListener(card) {
+  console.log('trash', card);
 }
-function editButtonListener(cardId) {
-  openCardEditor(cardId);
+function editButtonListener(card) {
+  openCardEditor(card);
 }
 function renderBackRow(text, buttonCallback) {
   const $row = document.createElement('div');
@@ -191,34 +231,44 @@ function renderBackRow(text, buttonCallback) {
   $row.append($button, $text);
   return $row;
 }
-function openCardEditor(cardId) {
-  $cardEditor.replaceChildren();
+function openCardEditor(card) {
   const studySet = data.viewingStudySet;
   if (!studySet) {
-    throw new Error('Cannot edit card if not viewing set');
+    throw new Error('cannot edit card without a study set');
   }
-  const currentCard = studySet.cards.find((card) => card.cardId === cardId);
-  if (!currentCard) {
-    throw new Error('card id does not match any cards in study set');
-  }
-  data.editingCard = currentCard;
+  $cardEditor.replaceChildren();
   viewSwap('specific-card');
   const $backRow = renderBackRow(studySet.setName, () => {
-    data.editingCard = null;
-    if (!data.viewingStudySet) {
-      throw new Error('cannot view non existent study set');
-    }
-    viewStudySet(data.viewingStudySet);
+    exitCardEditor();
   });
-  const $container = document.createElement('div');
-  const $cardFrontEditor = renderFrontSideEditor(currentCard);
-  const $cardBackEditor = renderBackSideEditor(currentCard);
-  $container.className = 'row wrap';
-  $container.append($cardFrontEditor, $cardBackEditor);
-  $cardEditor.append($backRow, $container);
-  $cardBackEditor.addEventListener('change', () => {
-    console.log('change');
+  const $selectPokemonRow = renderSelectPokemonRow();
+  $cardEditor.append($backRow);
+  if (card.pokemonId === 0) {
+    $cardEditor.append($selectPokemonRow);
+  } else {
+    console.log(
+      'line 328 come write some code for when theres actually a pokemon',
+    );
+  }
+}
+function renderSelectPokemonRow() {
+  const $row = document.createElement('div');
+  const $text = document.createElement('h2');
+  const $button = document.createElement('button');
+  const $arrow = document.createElement('i');
+  $row.className = 'row space-between horz-padding';
+  $text.textContent = 'Select a pokemon';
+  $button.className = 'icon-button';
+  $arrow.className = 'fa-solid fa-arrow-right';
+  $button.append($arrow);
+  $row.append($text, $button);
+  $button.addEventListener('click', () => {
+    openPokemonSelector();
   });
+  return $row;
+}
+function openPokemonSelector() {
+  viewSwap('select-pokemon');
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getFlavorText(pokemonData) {
@@ -253,6 +303,7 @@ async function getPokemonSpecies(idOrName) {
   const pokemonSpecies = await response.json();
   return pokemonSpecies;
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function renderBackSideEditor(card) {
   const { infoType, info } = card;
   const { textArray, index } = info;
@@ -340,6 +391,7 @@ function switchOutText(direction) {
   }
   writeData();
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function renderFrontSideEditor(card) {
   const $cardFrontEditor = document.createElement('div');
   const $titleRow = document.createElement('div');

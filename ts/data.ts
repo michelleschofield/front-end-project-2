@@ -4,8 +4,8 @@ interface Card {
   pokemonId: number;
   infoType: string;
   info: {
-    textArray?: string[];
-    index?: number;
+    textArray: string[];
+    index: number;
   };
   pokemonImg: string;
   cardId: number;

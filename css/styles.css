@@ -34,6 +34,14 @@ input {
   border-radius: 5px;
 }
 
+.x-large-text {
+  font-size: x-large;
+}
+
+.large-text {
+  font-size: large;
+}
+
 .small-text {
   font-size: small;
 }
@@ -144,7 +152,6 @@ input {
   height: 13rem;
   padding: 0.5rem;
   border-radius: 5px;
-  position: relative;
   margin: 0.5rem;
 }
 
@@ -160,7 +167,7 @@ input {
 
 .dropdown {
   height: 1.5rem;
-  width: 10rem;
+  width: 12rem;
   border: 1px solid rgb(142, 142, 142);
 }
 
@@ -168,6 +175,7 @@ input {
 
 .card.pokeball {
   padding: 0;
+  position: relative;
 }
 
 .red-half {

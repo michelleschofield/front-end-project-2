@@ -23,6 +23,12 @@ const $viewingSet = document.querySelector('#viewing-set') as HTMLDivElement;
 const $cardEditor = document.querySelector(
   '[data-view="specific-card"]',
 ) as HTMLDivElement;
+const $pokemonSelector = document.querySelector(
+  '[data-view="select-pokemon"]',
+) as HTMLDivElement;
+const $backToCardEditor = document.querySelector(
+  '#back-to-card-editor',
+) as HTMLButtonElement;
 
 if (!$menu) throw new Error('$menu query failed');
 if (!$closeMenuButton) throw new Error('$closeMenu query failed');
@@ -31,12 +37,14 @@ if (!$newSetButton) throw new Error('$newSetButton query failed');
 if (!$setsHolder) throw new Error('$setsHolder query failed');
 if (!$viewingSet) throw new Error('$viewingSet query failed');
 if (!$cardEditor) throw new Error('$cardEditor query failed');
+if (!$pokemonSelector) throw new Error('$pokemonSelector query failed');
+if (!$backToCardEditor) throw new Error('$backToCardEditor query failed');
 
 document.addEventListener('DOMContentLoaded', () => {
   viewSwap(data.currentView);
   setUpSets();
   if (data.editingCard) {
-    openCardEditor(data.editingCard.cardId);
+    openCardEditor(data.editingCard);
   } else if (data.viewingStudySet) {
     viewStudySet(data.viewingStudySet);
   }
@@ -48,6 +56,12 @@ $newSetButton.addEventListener('click', () => {
   createNewSet();
 });
 $setsHolder.addEventListener('click', handleSetsClick);
+$backToCardEditor.addEventListener('click', () => {
+  if (!data.editingCard) {
+    throw new Error('cannot go back to card editor when not editing a card');
+  }
+  openCardEditor(data.editingCard);
+});
 
 function createNewSet(): void {
   const setId = data.nextSetId;
@@ -145,6 +159,34 @@ function viewStudySet(studySet: StudySet): void {
     const renderedCard = renderBothSidesOfCard(card);
     $cardsContainer.append(renderedCard);
   });
+
+  $newCard.addEventListener('click', () => {
+    createNewCard();
+  });
+}
+
+function createNewCard(): void {
+  const currentStudySet = data.viewingStudySet;
+
+  if (!currentStudySet) {
+    throw new Error('cannot create card without viewing a study set');
+  }
+
+  const newCard: Card = {
+    pokemonName: '',
+    pokemonId: 0,
+    infoType: 'flavor_text',
+    info: {
+      textArray: [],
+      index: 0,
+    },
+    pokemonImg: '',
+    cardId: currentStudySet.nextCardId,
+  };
+
+  currentStudySet.nextCardId++;
+  data.editingCard = newCard;
+  openCardEditor(newCard);
 }
 
 function renderNewCardDiv(): HTMLDivElement {
@@ -152,7 +194,7 @@ function renderNewCardDiv(): HTMLDivElement {
   const $card = renderPokeballCard();
   const $newCardButton = document.createElement('button');
 
-  $row.className = 'row';
+  $row.className = 'row bg-light-gray';
   $newCardButton.className = 'icon-button sm-icon gray-text';
   $newCardButton.textContent = 'Make a new card';
 
@@ -167,8 +209,18 @@ function exitStudySet(): void {
   viewSwap('study sets');
 }
 
+function exitCardEditor(): void {
+  data.editingCard = null;
+  if (!data.viewingStudySet) {
+    throw new Error(
+      'You shouldnt have been in the card editor without a study set',
+    );
+  }
+  viewStudySet(data.viewingStudySet);
+}
+
 function renderBothSidesOfCard(card: Card): HTMLDivElement {
-  const { pokemonName, pokemonImg, infoType, info, cardId } = card;
+  const { pokemonName, pokemonImg, infoType, info } = card;
 
   const $holder = document.createElement('div');
   $holder.className = 'row horz-padding';
@@ -195,14 +247,14 @@ function renderBothSidesOfCard(card: Card): HTMLDivElement {
     );
   }
 
-  const $buttons = renderTrashAndEdit(cardId);
+  const $buttons = renderTrashAndEdit(card);
 
   $holder.append($frontSide, $backSide, $buttons);
 
   return $holder;
 }
 
-function renderTrashAndEdit(cardId: number): HTMLDivElement {
+function renderTrashAndEdit(card: Card): HTMLDivElement {
   const $buttonHolder = document.createElement('div');
   const $editButton = document.createElement('button');
   const $trashButton = document.createElement('button');
@@ -210,14 +262,11 @@ function renderTrashAndEdit(cardId: number): HTMLDivElement {
   const $trashIcon = document.createElement('i');
 
   $editButton.addEventListener('click', () => {
-    editButtonListener(cardId);
+    editButtonListener(card);
   });
   $trashButton.addEventListener('click', () => {
-    trashButtonListener(cardId);
+    trashButtonListener(card);
   });
-
-  $editButton.setAttribute('id', `${cardId}`);
-  $trashButton.setAttribute('id', `${cardId}`);
 
   $buttonHolder.className = 'row dir-column small-text justify-center';
   $editButton.className = 'icon-button gray-text';
@@ -232,12 +281,12 @@ function renderTrashAndEdit(cardId: number): HTMLDivElement {
   return $buttonHolder;
 }
 
-function trashButtonListener(cardId: number): void {
-  console.log('trash', cardId);
+function trashButtonListener(card: Card): void {
+  console.log('trash', card);
 }
 
-function editButtonListener(cardId: number): void {
-  openCardEditor(cardId);
+function editButtonListener(card: Card): void {
+  openCardEditor(card);
 }
 
 function renderBackRow(
@@ -265,45 +314,56 @@ function renderBackRow(
   return $row;
 }
 
-function openCardEditor(cardId: number): void {
-  $cardEditor.replaceChildren();
-
+function openCardEditor(card: Card): void {
   const studySet = data.viewingStudySet;
 
   if (!studySet) {
-    throw new Error('Cannot edit card if not viewing set');
+    throw new Error('cannot edit card without a study set');
   }
 
-  const currentCard = studySet.cards.find((card) => card.cardId === cardId);
-
-  if (!currentCard) {
-    throw new Error('card id does not match any cards in study set');
-  }
-
-  data.editingCard = currentCard;
+  $cardEditor.replaceChildren();
   viewSwap('specific-card');
 
   const $backRow = renderBackRow(studySet.setName, () => {
-    data.editingCard = null;
-
-    if (!data.viewingStudySet) {
-      throw new Error('cannot view non existent study set');
-    }
-    viewStudySet(data.viewingStudySet);
+    exitCardEditor();
   });
 
-  const $container = document.createElement('div');
-  const $cardFrontEditor = renderFrontSideEditor(currentCard);
-  const $cardBackEditor = renderBackSideEditor(currentCard);
+  const $selectPokemonRow = renderSelectPokemonRow();
 
-  $container.className = 'row wrap';
+  $cardEditor.append($backRow);
 
-  $container.append($cardFrontEditor, $cardBackEditor);
-  $cardEditor.append($backRow, $container);
+  if (card.pokemonId === 0) {
+    $cardEditor.append($selectPokemonRow);
+  } else {
+    console.log(
+      'line 328 come write some code for when theres actually a pokemon',
+    );
+  }
+}
 
-  $cardBackEditor.addEventListener('change', () => {
-    console.log('change');
+function renderSelectPokemonRow(): HTMLDivElement {
+  const $row = document.createElement('div');
+  const $text = document.createElement('h2');
+  const $button = document.createElement('button');
+  const $arrow = document.createElement('i');
+
+  $row.className = 'row space-between horz-padding';
+  $text.textContent = 'Select a pokemon';
+  $button.className = 'icon-button';
+  $arrow.className = 'fa-solid fa-arrow-right';
+
+  $button.append($arrow);
+  $row.append($text, $button);
+
+  $button.addEventListener('click', () => {
+    openPokemonSelector();
   });
+
+  return $row;
+}
+
+function openPokemonSelector(): void {
+  viewSwap('select-pokemon');
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -354,6 +414,7 @@ async function getPokemonSpecies(
   return pokemonSpecies;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function renderBackSideEditor(card: Card): HTMLDivElement {
   const { infoType, info } = card;
   const { textArray, index } = info;
@@ -466,6 +527,7 @@ function switchOutText(direction: number): void {
   writeData();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function renderFrontSideEditor(card: Card): HTMLDivElement {
   const $cardFrontEditor = document.createElement('div');
   const $titleRow = document.createElement('div');

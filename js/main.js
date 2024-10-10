@@ -96,10 +96,22 @@ function viewStudySet(studySet) {
   const $cardsContainer = document.createElement('div');
   $cardsContainer.className = 'row wrap';
   $viewingSet.append($backRow, $titleRow, $cardsContainer);
+  const $newCard = renderNewCardDiv();
+  $cardsContainer.append($newCard);
   cards.forEach((card) => {
     const renderedCard = renderBothSidesOfCard(card);
     $cardsContainer.append(renderedCard);
   });
+}
+function renderNewCardDiv() {
+  const $row = document.createElement('div');
+  const $card = renderPokeballCard();
+  const $newCardButton = document.createElement('button');
+  $row.className = 'row';
+  $newCardButton.className = 'icon-button sm-icon gray-text';
+  $newCardButton.textContent = 'Make a new card';
+  $row.append($card, $newCardButton);
+  return $row;
 }
 function exitStudySet() {
   data.viewingStudySet = null;
@@ -370,7 +382,6 @@ function renderPokemonSideOfCard(name, imageURL) {
   $card.append($imageWrapper, $name);
   return $card;
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function renderPokeballCard() {
   const $card = document.createElement('div');
   const $redHalf = document.createElement('div');
